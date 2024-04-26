@@ -1,4 +1,4 @@
-import { add, fmt, is, spread, vec, vectorTo } from "./coords.js";
+import { add, fmt, is, spread, sub, vec, vectorTo } from "./coords.js";
 import { arr2d, error, getAllRectCoordsClockwise } from "./util.js";
 
 export const tags = {
@@ -82,8 +82,8 @@ export const checkNearCoords = (g, { x, y }, fn) =>
 // Edges /////////////////////////////////////////////////////////////
 
 export const graphGetEdgeBetweenCoords = (g, from, { x, y }) => {
-  const vx = from.x - x,
-    vy = from.y - y;
+  let vx = x - from.x,
+    vy = y - from.y;
 
   if (vx * vy !== 0)
     error(`Diagonal connection: ${fmt(from)} -> ${fmt({ x, y })}`);
@@ -100,7 +100,7 @@ export const areGraphCoordsInterlinked = (g, a, b) =>
     ? false
     : b.x < 0 || b.y < 0
       ? false
-      : graphGetEdgeBetweenCoords(g, a, b).active;
+      : graphGetEdgeBetweenCoords(g, a, b).enabled;
 
 export const isGraphEdgeByVectorActive = (g, a, d) =>
   areGraphCoordsInterlinked(g, a, add(a, d));
@@ -110,7 +110,7 @@ export const graphCountEdgesAt = (g, a) => {
   for (const dir of cardinalDirections) {
     const v = add(a, dir);
     if (!coordsInGraphBounds(g, v)) continue;
-    if (graphGetEdgeBetweenCoords(g, v, a).active) count++;
+    if (graphGetEdgeBetweenCoords(g, v, a).enabled) count++;
   }
   return count;
 };
@@ -118,9 +118,9 @@ export const graphCountEdgesAt = (g, a) => {
 export const graphGetEdgeByVector = (g, { x, y }, { x: vx, y: vy }) =>
   graphGetEdgeBetweenCoords(g, { x, y }, vec(x + vx, y + vy));
 
-export const graphSetLinkByVector = (g, { x, y }, { vx, vy }, link) => {
+export const graphSetLinkByVector = (g, { x, y }, { x: vx, y: vy }, link) => {
   if (vx * vy !== 0)
-    error(`Diagonal connection: ${fmt(from)} -> ${fmt({ x, y })}`);
+    error(`Diagonal connection: ${fmt({ x, y })} -> ${fmt(vec(vx, vy))}`);
 
   if (vx == -1) x--, (vx = 1);
   if (vy == -1) y--, (vy = 1);
@@ -129,33 +129,27 @@ export const graphSetLinkByVector = (g, { x, y }, { vx, vy }, link) => {
 
 // Directed Edges ////////////////////////////////////////////////////
 
-export const isGraphEdgeDirectedBetweenCoords = (
-  g,
-  { x, y },
-  { x: toX, y: toY },
-) => {
-  const n = graphGetEdgeByVector(g, { x, y }, { toX, toY });
-  return n.active && n.reverse == (toX - x < 0 || toY - y < 0);
+export const isGraphEdgeDirectedBetweenCoords = (g, from, to) => {
+  const n = graphGetEdgeByVector(g, from, sub(to, from));
+  return n.enabled && n.reversed == (to.x - from.x < 0 || to.y - from.y < 0);
 };
 
 export const countGraphDirEdges = (g, { x, y }, countIn, countOut) => {
-  let count = 0;
-
   if (!countIn && !countOut) error("Nothing to count");
 
+  let count = 0;
+
   for (const dir of cardinalDirections) {
-    const [vx, vy] = spread(dir);
-    const otherX = vx + x,
-      otherY = vy + y;
+    const [otherX, otherY] = spread(add(dir, { x, y }));
     if (!coordsInGraphBounds(g, vec(otherX, otherY))) continue;
     if (
       countIn &&
-      isGraphEdgeDirectedBetweenCoords(g, vec(otherX, otherY), vec(x, y))
+      isGraphEdgeDirectedBetweenCoords(g, vec(otherX, otherY), { x, y })
     )
       count++;
     if (
       countOut &&
-      isGraphEdgeDirectedBetweenCoords(g, vec(x, y), vec(otherX, otherY))
+      isGraphEdgeDirectedBetweenCoords(g, { x, y }, vec(otherX, otherY))
     )
       count++;
   }
@@ -165,7 +159,7 @@ export const countGraphDirEdges = (g, { x, y }, countIn, countOut) => {
 
 export const isGraphEdgeDirectedByVector = (g, from, { x, y }) => {
   const n = graphGetEdgeByVector(g, from, { x, y });
-  return n.active || n.reverse == (x < 0 || y < 0);
+  return n.active || n.reversed == (x < 0 || y < 0);
 };
 
 export const doGraphCoordsHaveIncomingLinksOnly = (g, { x, y }) => {

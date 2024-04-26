@@ -3,15 +3,23 @@ import assert from "node:assert/strict";
 
 import { vec } from "../src/coords.js";
 import {
+  areGraphCoordsInterlinked,
   checkNearCoords,
   coordsInGraphBorder,
   coordsInGraphBounds,
   coordsInGraphCorner,
+  countGraphDirEdges,
   edge,
   edgeHasLinkToVector,
   getEdgeByVector,
   graph,
+  graphCountEdgesAt,
+  graphGetEdgeBetweenCoords,
+  graphGetEdgeByVector,
+  graphSetLinkByVector,
   graphSize,
+  isGraphEdgeByVectorActive,
+  isGraphEdgeDirectedBetweenCoords,
   node,
   resetEdge,
   resetNode,
@@ -164,9 +172,9 @@ describe("graph", () => {
   it("should check if coordinates are in a graph corner", () => {
     const myGraph = graph(3, 3);
 
-    assert(coordsInGraphCorner(myGraph, { x: 0, y: 0 }));
-    assert(coordsInGraphCorner(myGraph, { x: 0, y: 2 }));
-    assert.strictEqual(coordsInGraphCorner(myGraph, { x: 1, y: 1 }), false);
+    assert(coordsInGraphCorner(myGraph, vec(0)));
+    assert(coordsInGraphCorner(myGraph, vec(0, 2)));
+    assert.strictEqual(coordsInGraphCorner(myGraph, vec(1)), false);
   });
 
   it("should check if there are nodes with specific properties near given coordinates", () => {
@@ -178,11 +186,97 @@ describe("graph", () => {
       ],
     };
 
-    const result = checkNearCoords(
-      myGraph,
-      { x: 1, y: 1 },
-      (node) => node.active,
-    );
+    const result = checkNearCoords(myGraph, vec(1), (node) => node.active);
     assert(result);
+  });
+
+  it("should get the correct edge by coordinates and by vector", () => {
+    const myGraph = graph(2, 2);
+    myGraph.nodes[0][0].edges[0].reversed = true;
+    myGraph.nodes[0][0].edges[0].enabled = true;
+
+    const from = vec(0);
+    const to = vec(1, 0);
+
+    const result = graphGetEdgeBetweenCoords(myGraph, from, to);
+    const result2 = graphGetEdgeByVector(myGraph, from, to);
+
+    assert(result.enabled);
+    assert(result2.enabled);
+    assert(result.reversed);
+    assert(result2.reversed);
+  });
+
+  it("should ascertain whether graph coords are interlinked", () => {
+    const myGraph = graph(2, 2);
+
+    const from = vec(0);
+    const to = vec(1, 0);
+
+    assert.strictEqual(areGraphCoordsInterlinked(myGraph, from, to), false);
+    assert.strictEqual(isGraphEdgeByVectorActive(myGraph, from, to), false); // in this case, the vector and the coords are the same
+
+    myGraph.nodes[0][0].edges[0].enabled = true;
+
+    assert(areGraphCoordsInterlinked(myGraph, from, to));
+    assert(isGraphEdgeByVectorActive(myGraph, from, to));
+  });
+
+  it("should count active edges", () => {
+    const myGraph = graph(2, 2);
+    myGraph.nodes[0][0].edges[0].enabled = true;
+    myGraph.nodes[0][0].edges[1].enabled = true;
+
+    assert.strictEqual(graphCountEdgesAt(myGraph, vec(0)), 2);
+  });
+
+  it("should set links by vector", () => {
+    const myGraph = graph(3, 3);
+    graphSetLinkByVector(myGraph, vec(1), vec(0, 1), true);
+
+    assert(myGraph.nodes[1][1].edges[1].enabled);
+  });
+
+  it("should check if there is a directed edge between coordinates", () => {
+    const myGraph = graph(2, 3);
+
+    assert.strictEqual(
+      isGraphEdgeDirectedBetweenCoords(myGraph, vec(0), vec(0, 1)),
+      false,
+    );
+
+    myGraph.nodes[0][0].edges[1].enabled = true;
+
+    assert(isGraphEdgeDirectedBetweenCoords(myGraph, vec(0), vec(0, 1)));
+
+    myGraph.nodes[0][0].edges[1].reversed = true;
+
+    assert.strictEqual(
+      isGraphEdgeDirectedBetweenCoords(myGraph, vec(0), vec(0, 1)),
+      false,
+    );
+
+    assert(isGraphEdgeDirectedBetweenCoords(myGraph, vec(0, 1), vec(0)));
+  });
+
+  it("should count directed edges properly", () => {
+    const myGraph = graph(3, 3);
+
+    myGraph.nodes[0][0].edges[0].enabled = true;
+    myGraph.nodes[0][0].edges[0].reversed = true;
+
+    assert.strictEqual(countGraphDirEdges(myGraph, vec(0, 0), false, true), 0);
+    assert.strictEqual(countGraphDirEdges(myGraph, vec(0, 0), true, true), 1);
+
+    myGraph.nodes[0][0].edges[1].enabled = true;
+
+    assert.strictEqual(countGraphDirEdges(myGraph, vec(0, 0), true, true), 2);
+    assert.strictEqual(countGraphDirEdges(myGraph, vec(0, 0), true, false), 1);
+
+    myGraph.nodes[1][0].edges[0].enabled = true;
+
+    assert.strictEqual(countGraphDirEdges(myGraph, vec(1, 0), true, true), 2);
+    assert.strictEqual(countGraphDirEdges(myGraph, vec(1, 0), false, true), 2);
+    assert.strictEqual(countGraphDirEdges(myGraph, vec(1, 0), true, false), 0);
   });
 });
