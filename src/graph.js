@@ -1,5 +1,5 @@
-import { add, fmt, is, spread, vec, vectorTo } from "./coords";
-import { arr2d, error, getAllRectCoordsClockwise, id } from "./util";
+import { add, fmt, is, spread, vec, vectorTo } from "./coords.js";
+import { arr2d, error, getAllRectCoordsClockwise } from "./util.js";
 
 export const tags = {
   Start: "Start",
@@ -40,9 +40,9 @@ export const swapTags = (a, b) => ([a.tags, b.tags] = [b.tags, a.tags]);
 export const resetNode = (n) => (
   n.finalized ? error("Node is finalized!") : null,
   (n.active = false),
-  (n.edges = n.edges.map((e) => (e.enabled = false)))
+  n.edges.forEach((e) => (e.active = false))
 );
-export const resetEdge = (e) => ((e.enabled = false), (e.dirReversed = false));
+export const resetEdge = (e) => ((e.active = false), (e.reversed = false));
 
 export const getEdgeByVector = (n, a) =>
   is(a, vec(1, 0))
@@ -69,7 +69,7 @@ export const graphSize = (g) => [g.nodes.length, g.nodes[0].length];
 export const coordsInGraphBounds = (g, { x, y }) =>
   x >= 0 && x < g.nodes.length && y >= 0 && y < g.nodes[0].length;
 export const coordsInGraphBorder = (g, { x, y }) =>
-  x == 0 && x == g.nodes.length - 1 && y == 0 && y == g.nodes[0].length - 1;
+  (x == 0 || x == g.nodes.length - 1) && (y == 0 || y == g.nodes[0].length - 1);
 export const coordsInGraphCorner = (g, { x, y }) =>
   (x == 0 || x == g.nodes.length - 1) && (y == 0 || y == g.nodes[0].length - 1);
 
@@ -432,13 +432,13 @@ export const testSanity = (g) => {
 //////////////////////////////////////////////////////////////////////
 
 export const tag = (tag, id) => ({ tag, id });
-export const edge = (enabled = false, tags = [], dirReversed = false) => ({
+export const edge = (enabled = false, tags = [], reversed = false) => ({
   enabled,
   tags,
-  dirReversed,
+  reversed,
 });
 export const node = (
-  edges = [],
+  edges = [edge(), edge()],
   tags = [],
   active = false,
   finalized = false,
