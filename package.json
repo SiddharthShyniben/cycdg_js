@@ -1,0 +1,13 @@
+{
+  "name": "cycdg_js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "Siddharth Shyniben <siddharth.muscat@gmail.com> (https://siddu.tech/)",
+  "license": "ISC"
+}
