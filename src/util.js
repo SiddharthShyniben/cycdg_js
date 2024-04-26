@@ -1,13 +1,5 @@
-export const enumerate = ([lst]) =>
-  Object.freeze(
-    Object.assign(
-      {},
-      ...lst.split(",").map((k) => ({ [k.trim()]: Symbol(k.trim()) })),
-    ),
-  );
+import { vec } from "./coords.js";
 
-let i = 0;
-export const id = () => i++;
 export const error = (msg) => {
   throw new Error(msg);
 };

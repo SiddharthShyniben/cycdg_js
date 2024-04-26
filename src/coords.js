@@ -1,8 +1,8 @@
 export const vec = (x = 0, y = x) => (typeof x.x == "number" ? x : { x, y });
-export const _vecify =
+const _vecify =
   (fn) =>
   (...args) =>
-    fn(...args.map(vec));
+    fn(...args.map((x) => vec(x)));
 
 export const spread = (a) => [a.x, a.y];
 export const fmt = _vecify(({ x, y }) => `(${x}, ${y})`);
