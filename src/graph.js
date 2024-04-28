@@ -40,16 +40,16 @@ export const swapTags = (a, b) => ([a.tags, b.tags] = [b.tags, a.tags]);
 export const resetNode = (n) => (
   n.finalized ? error("Node is finalized!") : null,
   (n.active = false),
-  n.edges.forEach((e) => (e.active = false))
+  n.edges.forEach((e) => (e.enabled = false))
 );
-export const resetEdge = (e) => ((e.active = false), (e.reversed = false));
+export const resetEdge = (e) => ((e.enabled = false), (e.reversed = false));
 
 export const getEdgeByVector = (n, a) =>
   is(a, vec(1, 0))
     ? n.edges[0]
     : is(a, vec(0, 1))
       ? n.edges[1]
-      : error("Bad vector");
+      : error("Bad vector " + fmt(a));
 
 export const setEdgeLinkByVector = (n, a, enabled, reversed) => {
   const edge = getEdgeByVector(n, a);
@@ -81,7 +81,8 @@ export const checkNearCoords = (g, { x, y }, fn) =>
 
 // Edges /////////////////////////////////////////////////////////////
 
-export const graphGetEdgeBetweenCoords = (g, from, { x, y }) => {
+export const graphGetEdgeBetweenCoords = (g, f, { x, y }) => {
+  const from = { ...f }; // Don't mutate!
   let vx = x - from.x,
     vy = y - from.y;
 
@@ -157,18 +158,17 @@ export const countGraphDirEdges = (g, { x, y }, countIn, countOut) => {
   return count;
 };
 
-export const isGraphEdgeDirectedByVector = (g, from, { x, y }) => {
-  const n = graphGetEdgeByVector(g, from, { x, y });
-  return n.active || n.reversed == (x < 0 || y < 0);
+export const isGraphEdgeDirectedByVector = (g, from, to) => {
+  const n = graphGetEdgeByVector(g, from, to);
+  return n.enabled && n.reversed == (to.x - from.x < 0 || to.y - from.y < 0);
 };
 
-export const doGraphCoordsHaveIncomingLinksOnly = (g, { x, y }) => {
+export const doGraphCoordsHaveIncomingLinksOnly = (g, coords) => {
   for (const dir of cardinalDirections) {
-    const [vx, vy] = spread(dir);
     if (
-      coordsInGraphBounds(g, vec(x + vx, y + vy)) &&
-      isGraphEdgeByVectorActive({ x, y }, dir) &&
-      isGraphEdgeDirectedByVector({ x, y }, dir)
+      coordsInGraphBounds(g, add(coords, dir)) &&
+      isGraphEdgeByVectorActive(g, coords, dir) &&
+      isGraphEdgeDirectedByVector(g, coords, dir)
     ) {
       return false;
     }
@@ -178,8 +178,9 @@ export const doGraphCoordsHaveIncomingLinksOnly = (g, { x, y }) => {
 };
 
 export const graphEnableDirLinkByVector = (g, { x, y }, { x: vx, y: vy }) => {
+  console.log({ x, y }, { vx, vy });
   if (vx * vy !== 0)
-    error(`Diagonal connection: ${fmt(from)} -> ${fmt({ x, y })}`);
+    error(`Diagonal connection: ${fmt({ x, y })} -> ${fmt({ x, y })}`);
 
   let reverse = false;
 
@@ -199,7 +200,7 @@ export const graphResetNodeAndConnections = (g, c) => {
   resetNode(g.nodes[c.x][c.y]); // NOTE: just loop edges from node?
   for (const dir of cardinalDirections) {
     if (coordsInGraphBounds(g, add(c, dir))) {
-      resetEdge(getEdgeByVector(c, dir));
+      resetEdge(getEdgeByVector(g.nodes[c.x][c.y], dir));
     }
   }
 };
@@ -213,10 +214,12 @@ export const graphAreNodesBetweenCoordsEditable = (g, from, to) => {
 
   for (let x = x1; x <= x2; x++) {
     for (let y = y1; y <= y2; y++) {
-      if (!coordsInGraphBounds({ x, y })) return false;
+      if (!coordsInGraphBounds(g, { x, y })) return false;
       if (g.nodes[x][y].finalized) return false;
     }
   }
+
+  return true;
 };
 
 export const graphGetEnabledNodesCount = (g) =>
@@ -234,7 +237,8 @@ export const graphGetFilledNodesPercentage = (g) => {
   const [w, h] = graphSize(g);
   const total = w * h;
 
-  return (100 * count + total / 2) / total;
+  // return (100 * count + total / 2) / total; // why a bias?
+  return (100 * count) / total;
 };
 
 // Tags //////////////////////////////////////////////////////////////
@@ -263,10 +267,10 @@ export const graphAddEdgeTagByCoords = (g, from, to, kind) => {
   graphGetEdgeBetweenCoords(g, from, to).tags.push(tag(kind, id));
 };
 
-export const graphAddEdgeTagByCoordsPreserveLastId = (g, { x, y }, kind) => {
+export const graphAddEdgeTagByCoordsPreserveLastId = (g, from, to, kind) => {
   g.appliedTags[kind] ??= 0;
   g.appliedTags[kind]--;
-  graphAddEdgeTagByCoords(g, { x, y }, kind);
+  graphAddEdgeTagByCoords(g, from, to, kind);
 };
 
 export const graphAddTagToAllActiveEdgesByCoords = (g, kind, c) => {
@@ -284,7 +288,7 @@ export const graphSwapNodeTags = (g, { x, y }, { x: x2, y: y2 }) =>
 export const graphNodeHasTags = (g, { x, y }) => g.nodes[x][y].tags.length > 0;
 export const graphNodeCountTags = (g, { x, y }) => g.nodes[x][y].tags.length;
 export const graphNodeHasTag = (g, { x, y }, kind) =>
-  g.nodes[x][y].tags.find((t) => t.kind == kind);
+  !!g.nodes[x][y].tags.find((t) => t.tag == kind);
 
 export const graphEdgeHasTags = (g, c, v) =>
   graphGetEdgeByVector(g, c, v).tags.length > 0;
@@ -297,7 +301,7 @@ export const graphSwapEdgeTags = (g, f1, f2, t1, t2) =>
 
 export const copyEdgeTagsPreservingIds = (g, f1, f2, t1, t2) =>
   graphGetEdgeBetweenCoords(g, f1, f2).tags.push(
-    ...graphGetEdgeBetweenCoords(t1, t2).tags,
+    ...graphGetEdgeBetweenCoords(g, t1, t2).tags,
   );
 
 // Drawing ///////////////////////////////////////////////////////////
@@ -309,19 +313,19 @@ export const drawCardinalConnectedLine = (g, from, to) => {
   const vx = x2 !== x1 ? (x2 - x1) / Math.abs(x2 - x1) : 0;
   const vy = y2 !== y1 ? (y2 - y1) / Math.abs(y2 - y1) : 0;
 
-  g.nodes[x1][y1].enabled = true;
+  g.nodes[x1][y1].active = true;
 
   let x = x1,
     y = y1;
 
   while (vx != 0 && x !== x2) {
-    g.nodes[x + vx][y + vy].enabled = true;
+    g.nodes[x + vx][y + vy].active = true;
     graphEnableDirLinkByVector(g, { x, y }, vec(vx, vy));
     x += vx;
   }
 
   while (vy != 0 && y !== y2) {
-    g.nodes[x + vx][y + vy].enabled = true;
+    g.nodes[x + vx][y + vy].active = true;
     graphEnableDirLinkByVector(g, { x, y }, vec(vx, vy));
     y += vy;
   }
@@ -336,7 +340,7 @@ export const drawConnectedDirectionalRect = (
   const rghX = x + w - 1;
   const botY = y + h - 1;
 
-  const corners = [{ x, y }, vec(x, botY), vec(rghX, botY), vec(rghX, y)];
+  const corners = [{ x, y }, vec(rghX, y), vec(rghX, botY), vec(x, botY)];
   if (ccw) corners.reverse();
 
   for (let i = 0; i < 4; i++)
@@ -367,7 +371,7 @@ export const drawBiconnectedDirectionalRect = (
   for (let i = sourceIndex; i != sinkIndex; ) {
     const next = (i + 1) % allCoords.length;
     const c = allCoords[i];
-    const v = sub(allCoords[next], vec(cx, cy));
+    const v = sub(allCoords[next], c);
     g.nodes[c.x + v.x][c.y + v.y].active = true;
     graphEnableDirLinkByVector(g, c, v);
     i = next;
@@ -375,9 +379,9 @@ export const drawBiconnectedDirectionalRect = (
 
   // second pass
   for (let i = sourceIndex; i != sinkIndex; ) {
-    const next = i - 1 < 0 ? allCoords.length - 1 : i;
+    const next = i - 1 < 0 ? allCoords.length - 1 : i - 1;
     const c = allCoords[i];
-    const v = sub(allCoords[next], vec(cx, cy));
+    const v = sub(allCoords[next], c);
     g.nodes[c.x + v.x][c.y + v.y].active = true;
     graphEnableDirLinkByVector(g, c, v);
     i = next;
@@ -392,6 +396,7 @@ export const testSanity = (g) => {
 
   for (let x = 0; x < g.nodes.length; x++) {
     for (let y = 0; y < g.nodes[0].length; y++) {
+      const node = g.nodes[x][y];
       if (!node.active) {
         if (node.tags.length > 0) {
           sane = false;
@@ -409,7 +414,7 @@ export const testSanity = (g) => {
       } else {
         if (
           graphCountEdgesAt(g, { x, y }) == 0 &&
-          !g.nodes[x][y].tags.find((t) => t.kind == tags.Teleport)
+          !g.nodes[x][y].tags.find((t) => t.tag == tags.Teleport)
         ) {
           sane = false;
           problems.push(`Active node at ${fmt({ x, y })} has no active links!`);
