@@ -1,10 +1,9 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
-import { add, vec } from "../src/coords.js";
+import { vec } from "../src/coords.js";
 import {
   areGraphCoordsInterlinked,
-  cardinalDirections,
   checkNearCoords,
   coordsInGraphBorder,
   coordsInGraphBounds,
