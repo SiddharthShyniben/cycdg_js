@@ -9,5 +9,8 @@
   "type": "module",
   "keywords": [],
   "author": "Siddharth Shyniben <siddharth.muscat@gmail.com> (https://siddu.tech/)",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "rand-seed": "^1.0.2"
+  }
 }
