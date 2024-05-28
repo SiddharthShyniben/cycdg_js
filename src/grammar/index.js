@@ -1,6 +1,4 @@
-import Rand from "rand-seed";
-
-const rng = new Rand.default("seed");
+import { rng } from "../rng";
 
 export const rule = (r) => ({
   ...r,

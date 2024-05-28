@@ -9,24 +9,24 @@ import {
   graphSize,
   tags,
 } from "../graph";
+import { rng } from "../rng";
 import {
   areCoordsOnRect,
   getRandomGraphCoordsByFunc,
   pushNodeContensInRandomDirection,
   pushNodeContensInRandomDirectionWithEdgeTag,
   randomHazard,
-  randomInRange,
 } from "../util";
 
 export default [
   rule({
     name: "non-adjacent cycle",
     addsCycle: true,
-    isApplicableAt: (g, _rng, c) => coordsInGraphBounds(g, add(c, 2)),
-    applyOnGraphAt: (g, rng, { x, y }) => {
+    isApplicableAt: (g, c) => coordsInGraphBounds(g, add(c, 2)),
+    applyOnGraphAt: (g, { x, y }) => {
       const [w, h] = graphSize(g);
-      const rw = randomInRange(rng, 3, w - x),
-        rh = randomInRange(rng, 3, h - y);
+      const rw = rng.randInRange(3, w - x),
+        rh = rng.randInRange(3, h - y);
 
       const start = getRandomGraphCoordsByFunc(g, (c) =>
         areCoordsOnRect(c, { x, y }, vec(rw, rh)),
@@ -65,7 +65,7 @@ export default [
           graphAddNodeTag(g, c1, randomHazard());
           graphAddNodeTag(g, c2, randomHazard());
 
-          if (randomInRange(rng, 0, 3) == 0)
+          if (rng.randInRange(0, 3) == 0)
             pushNodeContensInRandomDirection(g, goal);
         },
       },
@@ -106,11 +106,11 @@ export default [
   rule({
     name: "adjacent cycle",
     addsCycle: true,
-    isApplicableAt: (g, _rng, c) => coordsInGraphBounds(g, add(c, 2)),
-    applyOnGraphAt: (g, rng, { x, y }) => {
+    isApplicableAt: (g, c) => coordsInGraphBounds(g, add(c, 2)),
+    applyOnGraphAt: (g, { x, y }) => {
       const [w, h] = graphSize(g);
-      const rw = randomInRange(rng, 3, w - x),
-        rh = randomInRange(rng, 3, h - y);
+      const rw = rng.randInRange(3, w - x),
+        rh = rng.randInRange(3, h - y);
 
       const start = getRandomGraphCoordsByFunc(g, (c) =>
         areCoordsOnRect(c, { x, y }, vec(rw, rh)),

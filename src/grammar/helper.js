@@ -1,6 +1,7 @@
 import { graphSize } from "../graph.js";
 import { error, range } from "../util.js";
 import { spread } from "../coords.js";
+import { rng } from "../rng.js";
 
 export const isRuleApplicableForGraph = (rule, graph) => {
   const [w, h] = graphSize(graph);
@@ -24,7 +25,7 @@ export const getCandidateCellForRule = (rule, graph) => {
     }
   }
 
-  return candidates[~~(Math.random() * rule.rng.next())];
+  return rng.fromArr(candidates);
 };
 
 export const tryFindAllApplicableCoordVariantsRecursively = (
@@ -74,4 +75,17 @@ export const tryFindAllApplicableCoordVariantsRecursively = (
   }
 
   return result;
+};
+
+export const getRandomApplicableCoordsForRule = (rule, graph) => {
+  const [w, h] = graphSize(graph);
+  const candidates = [];
+
+  for (const x of range(w)) {
+    for (const y of range(h)) {
+      if (rule.isApplicableAt(graph, x, y)) candidates.push({ x, y });
+    }
+  }
+
+  return rng.fromArr(candidates);
 };

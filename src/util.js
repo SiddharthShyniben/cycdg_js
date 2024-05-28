@@ -7,6 +7,7 @@ import {
   graphSwapNodeTags,
   tags,
 } from "./graph.js";
+import { rng } from "./rng.js";
 
 export const error = (msg) => {
   throw new Error(msg);
@@ -55,7 +56,7 @@ export const weightedRandom = (items, weights) => {
   }
 
   const maxCumulativeWeight = cumulativeWeights[cumulativeWeights.length - 1];
-  const randomNumber = maxCumulativeWeight * Math.random();
+  const randomNumber = maxCumulativeWeight * rng.rand();
 
   for (let itemIndex = 0; itemIndex < items.length; itemIndex += 1) {
     if (cumulativeWeights[itemIndex] >= randomNumber) {
@@ -87,7 +88,7 @@ export const getRandomGraphCoordsByFunc = (graph, fn) => {
     }
   }
 
-  return candidates[~~(Math.random() * candidates.length)];
+  return rng.fromArr(candidates);
 };
 
 export const getRandomGraphCoordsByScore = (graph, fn) => {
@@ -120,16 +121,16 @@ export const areAllNodeTagsMovable = (g, { x, y }) =>
   g.nodes[x][y].tags.every(isTagMovable);
 
 export const randomHazard = () =>
-  [tags.Boss, tags.Trap, tags.Hazard][~~(Math.random() * 3)];
+  rng.fromArr([tags.Boss, tags.Trap, tags.Hazard]);
 
 export const moveRandomNodeTag = (graph, from, to) => {
   const { tags } = graph.nodes[from.x][from.y];
   if (!tags.length) return;
 
-  const i = ~~(Math.random() * tags.length);
-  if (!isTagMovable(tags[i])) return null;
+  const tag = rng.fromArr(tags);
+  if (!isTagMovable(tag)) return null;
 
-  graph.nodes[to.x][to.y].tags.push(tags[i]);
+  graph.nodes[to.x][to.y].tags.push(tag);
   graph.nodes[from.y][from.y].splice(i, 1);
 };
 
@@ -165,10 +166,4 @@ export const addTagAtRandomActiveNode = (graph, tag) =>
     tag,
   );
 
-export const randomInRange = (rng, min, max) => {
-  if (max < min) [max, min] = [min, max];
-
-  const minCeiled = Math.ceil(min);
-  const maxFloored = Math.floor(max);
-  return Math.floor(rng.rand() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
-};
+export const clamp = (num, min, max) => Math.max(Math.min(num, max), min);
