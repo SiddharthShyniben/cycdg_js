@@ -1,12 +1,12 @@
-import { graph, graphGetEnabledNodesCount } from "./graph";
-import { clamp } from "./util";
+import { graph, graphGetEnabledNodesCount } from "./graph.js";
+import { clamp } from "./util.js";
 
-import allInitalRules from "./grammar/initial-rules";
+import allInitalRules from "./grammar/initial-rules.js";
 import {
   getRandomApplicableCoordsForRule,
   isRuleApplicableForGraph,
-} from "./grammar/helper";
-import { rng } from "./rng";
+} from "./grammar/helper.js";
+import { rng } from "./rng.js";
 
 class GraphReplacementApplier {
   constructor(

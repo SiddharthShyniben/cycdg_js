@@ -1,4 +1,4 @@
-import { add, adjacent, is, manhattan, vec } from "../coords";
+import { add, adjacent, is, manhattan, vec } from "../coords.js";
 import {
   coordsInGraphBounds,
   drawBiconnectedDirectionalRect,
@@ -8,15 +8,15 @@ import {
   graphNodeHasTag,
   graphSize,
   tags,
-} from "../graph";
-import { rng } from "../rng";
+} from "../graph.js";
+import { rng } from "../rng.js";
 import {
   areCoordsOnRect,
   getRandomGraphCoordsByFunc,
   pushNodeContensInRandomDirection,
   pushNodeContensInRandomDirectionWithEdgeTag,
   randomHazard,
-} from "../util";
+} from "../util.js";
 
 export default [
   {
