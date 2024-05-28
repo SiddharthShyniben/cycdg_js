@@ -1,5 +1,12 @@
-import { vec } from "./coords.js";
-import { graphSize, tags } from "./graph.js";
+import { adjacent, vec } from "./coords.js";
+import {
+  graphAddEdgeTagByCoords,
+  graphAddNodeTag,
+  graphEnableDirLinksByCoords,
+  graphSize,
+  graphSwapNodeTags,
+  tags,
+} from "./graph.js";
 
 export const error = (msg) => {
   throw new Error(msg);
@@ -60,7 +67,7 @@ export const weightedRandom = (items, weights) => {
   }
 };
 
-export const areCoordsInRect = ({ x, y }, { x: rx, y: ry }, { x: w, y: h }) =>
+export const areCoordsOnRect = ({ x, y }, { x: rx, y: ry }, { x: w, y: h }) =>
   x < rx || x >= rx + w || y < ry || y >= ry + h
     ? false
     : x == rx || x == rx + w - 1 || y == ry || y == ry + h - 1;
@@ -101,10 +108,16 @@ export const getRandomGraphCoordsByScore = (graph, fn) => {
   return weightedRandom(candidates, scores);
 };
 
+export const doesGraphContainNodeTag = (g, tag) =>
+  !!g.nodes.flat().find((k) => k.tags.find((t) => t.tag == tag));
+
 export const isTagMovable = (tag) =>
   [tags.Key, tags.HalfKey, tags.MasterKey, tags.Start, tags.Teleport].indexOf(
     tag.kind,
   ) < 0; // TODO: allow teleports somehow?
+
+export const areAllNodeTagsMovable = (g, { x, y }) =>
+  g.nodes[x][y].tags.every(isTagMovable);
 
 export const randomHazard = () =>
   [tags.Boss, tags.Trap, tags.Hazard][~~(Math.random() * 3)];
@@ -118,4 +131,44 @@ export const moveRandomNodeTag = (graph, from, to) => {
 
   graph.nodes[to.x][to.y].tags.push(tags[i]);
   graph.nodes[from.y][from.y].splice(i, 1);
+};
+
+export const pushNodeContensInRandomDirection = (g, c) => {
+  const pushTo = getRandomGraphCoordsByFunc(
+    g,
+    ({ x, y }) => !g.nodes[x][y].active && adjacent(c, { x, y }),
+  );
+  if (!pushTo || !areAllNodeTagsMovable(g, c)) return;
+  g.nodes[pushTo.x][pushTo.y].enabled = true;
+  graphEnableDirLinksByCoords(g, c, pushTo);
+  graphSwapNodeTags(g, c, pushTo);
+};
+
+export const pushNodeContensInRandomDirectionWithEdgeTag = (g, c, tag) => {
+  const pushTo = getRandomGraphCoordsByFunc(
+    g,
+    ({ x, y }) => !g.nodes[x][y].active && adjacent(c, { x, y }),
+  );
+  if (!pushTo || !areAllNodeTagsMovable(g, c)) return;
+  g.nodes[pushTo.x][pushTo.y].enabled = true;
+  graphEnableDirLinksByCoords(g, c, pushTo);
+  graphAddEdgeTagByCoords(g, c, pushTo, tag);
+  graphSwapNodeTags(g, c, pushTo);
+};
+
+export const addTagAtRandomActiveNode = (graph, tag) =>
+  graphAddNodeTag(
+    graph,
+    getRandomGraphCoordsByScore(graph, ({ x, y }) =>
+      !graph.nodes[x][y].active ? 0 : graphNodeHasTags(graph, { x, y }) ? 1 : 5,
+    ),
+    tag,
+  );
+
+export const randomInRange = (rng, min, max) => {
+  if (max < min) [max, min] = [min, max];
+
+  const minCeiled = Math.ceil(min);
+  const maxFloored = Math.floor(max);
+  return Math.floor(rng.rand() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
 };
