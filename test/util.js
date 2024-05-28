@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
-import { error, arr2d, getAllRectCoordsClockwise } from "../src/util.js";
+import { error, arr2d, getAllRectCoordsClockwise, range } from "../src/util.js";
 
 describe("arr2d", () => {
   it("should create a 2D array of the specified width and height filled with the specified value", () => {
@@ -65,5 +65,12 @@ describe("getAllRectCoordsClockwise", () => {
 
     const actualCoords = getAllRectCoordsClockwise(topLeft, dimensions);
     assert.deepStrictEqual(actualCoords, expectedCoords);
+  });
+});
+
+describe("range", () => {
+  it("should create a range", () => {
+    assert.deepEqual(range(1, 5), [1, 2, 3, 4]);
+    assert.deepEqual(range(5), [0, 1, 2, 3, 4]);
   });
 });
