@@ -82,8 +82,9 @@ export const areCoordsInRectCorner = (
 export const getRandomGraphCoordsByFunc = (graph, fn) => {
   const candidates = [];
   const [w, h] = graphSize(graph);
-  for (const x in range(w)) {
-    for (const y in range(h)) {
+  for (let x in range(w)) {
+    for (let y in range(h)) {
+      (x = +x), (y = +y);
       if (fn({ x, y })) candidates.push({ x, y });
     }
   }

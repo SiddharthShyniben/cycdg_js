@@ -8,7 +8,7 @@ import {
 } from "./grammar/helper.js";
 import { rng } from "./rng.js";
 
-class GraphReplacementApplier {
+export class GraphReplacementApplier {
   constructor(
     width = 4,
     height = 5,
@@ -19,14 +19,12 @@ class GraphReplacementApplier {
       minFilledPercentage,
       maxFilledPercentage,
       maxTeleports,
-    },
+    } = {},
   ) {
     this.width = clamp(width, 4, 25);
     this.height = clamp(height, 5, 25);
 
     this.graph = graph(this.width, this.height);
-
-    this.options = options;
 
     this.minCycles = clamp(minCycles || 3, 1, 100);
     this.maxCycles = clamp(maxCycles || 8, 1, 100);
@@ -47,7 +45,7 @@ class GraphReplacementApplier {
       this.minFilledPercentage,
       this.maxFilledPercentage,
     );
-    this.appliedRules = null;
+    this.appliedRules = [];
     this.appliedRulesCount =
       this.appliedFeaturesCount =
       this.teleportsCount =
@@ -67,7 +65,7 @@ class GraphReplacementApplier {
   }
 
   applyInitialRule(rule) {
-    const c = getRandomApplicableCoordsForRule(rule, graph);
+    const c = getRandomApplicableCoordsForRule(rule, this.graph);
     rule.applyOnGraphAt(this.graph, c);
 
     const appliedFeature = rng.fromArr(rule.mandatoryFeatures);

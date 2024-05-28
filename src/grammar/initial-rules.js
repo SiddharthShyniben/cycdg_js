@@ -115,10 +115,12 @@ export default [
       const start = getRandomGraphCoordsByFunc(g, (c) =>
         areCoordsOnRect(c, { x, y }, vec(rw, rh)),
       );
+
       const goal = getRandomGraphCoordsByFunc(
         g,
         (c) => areCoordsOnRect(c, { x, y }, vec(rw, rh)) && adjacent(start, c),
       );
+
       drawBiconnectedDirectionalRect(g, { x, y }, vec(rw, rh), start, goal);
       graphAddNodeTag(g, start, tags.Start);
       graphAddNodeTag(g, goal, tags.Goal);
