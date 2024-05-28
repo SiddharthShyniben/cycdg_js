@@ -19,7 +19,7 @@ import {
 } from "../util";
 
 export default [
-  rule({
+  {
     name: "non-adjacent cycle",
     addsCycle: true,
     isApplicableAt: (g, c) => coordsInGraphBounds(g, add(c, 2)),
@@ -102,8 +102,8 @@ export default [
         },
       },
     ],
-  }),
-  rule({
+  },
+  {
     name: "adjacent cycle",
     addsCycle: true,
     isApplicableAt: (g, c) => coordsInGraphBounds(g, add(c, 2)),
@@ -155,5 +155,5 @@ export default [
         },
       },
     ],
-  }),
+  },
 ];
