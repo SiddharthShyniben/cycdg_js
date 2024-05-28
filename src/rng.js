@@ -1,7 +1,7 @@
 import Rand from "rand-seed";
 
 export class RNG {
-  constructor(seed = Date.now()) {
+  constructor(seed) {
     this.rng = new Rand.default(seed);
   }
 
@@ -23,4 +23,4 @@ export class RNG {
   }
 }
 
-export const rng = new RNG();
+export const rng = new RNG(Math.random().toString());

@@ -11,6 +11,7 @@
   "author": "Siddharth Shyniben <siddharth.muscat@gmail.com> (https://siddu.tech/)",
   "license": "ISC",
   "dependencies": {
+    "@nuff-said/color": "^1.0.0",
     "rand-seed": "^1.0.2"
   }
 }
