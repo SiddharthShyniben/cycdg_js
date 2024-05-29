@@ -8,7 +8,7 @@ export const isRuleApplicableForGraph = (rule, graph) => {
 
   for (const x of range(w)) {
     for (const y of range(h)) {
-      if (rule.isApplicableAt(graph, x, y)) return true;
+      if (rule.isApplicableAt(graph, { x, y })) return true;
     }
   }
 
@@ -21,7 +21,7 @@ export const getCandidateCellForRule = (rule, graph) => {
 
   for (const x of range(w)) {
     for (const y of range(h)) {
-      if (rule.isApplicableAt(graph, x, y)) candidates.push(vec(x, y));
+      if (rule.isApplicableAt(graph, { x, y })) candidates.push(vec(x, y));
     }
   }
 
@@ -83,7 +83,7 @@ export const getRandomApplicableCoordsForRule = (rule, graph) => {
 
   for (const x of range(w)) {
     for (const y of range(h)) {
-      if (rule.isApplicableAt(graph, x, y)) candidates.push({ x, y });
+      if (rule.isApplicableAt(graph, { x, y })) candidates.push({ x, y });
     }
   }
 
