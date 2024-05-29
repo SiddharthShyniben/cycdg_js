@@ -1,6 +1,12 @@
 import unbug from "unbug";
 import { fmt } from "./coords.js";
-import { graphSize, tags, testSanity } from "./graph.js";
+import {
+  graphNodeHasTag,
+  graphSize,
+  nodeHasTag,
+  tags,
+  testSanity,
+} from "./graph.js";
 import { range } from "./util.js";
 
 import color from "@nuff-said/color";
@@ -31,36 +37,43 @@ export const drawGraph = ({ graph, appliedRules }) => {
 
     for (const x of range(w)) {
       const node = graph.nodes[x][y];
-      if (node.active) {
-        if (node.tags.find((t) => t.tag == tags.Start))
-          cells.push({ node, active: true, start: true, x, y });
-        else if (node.tags.find((t) => t.tag == tags.Goal))
-          cells.push({ node, active: true, goal: true, x, y });
-        else cells.push({ node, active: true, x, y });
-      } else {
-        cells.push({ node, x, y });
-      }
-    }
 
-    cells = cells.map((c) =>
-      c.active
-        ? c.start
-          ? {
-              ...c,
-              text: "Start".padEnd(9 * 5, " "),
-              bg: color.redBg,
-              fg: color.black,
-            }
-          : c.goal
-            ? {
-                ...c,
-                text: "Goal".padEnd(9 * 5, " "),
-                bg: color.redBg,
-                fg: color.black,
-              }
-            : { ...c, text: " ".repeat(9 * 5), bg: color.blueBg }
-        : { ...c, text: " ".repeat(9 * 5), bg: color.blackBg },
-    );
+      let item = {
+        node,
+        x,
+        y,
+        text: "",
+      };
+
+      const start = nodeHasTag(node, tags.Start);
+      const goal = nodeHasTag(node, tags.Goal);
+
+      const tagsToCheck = [
+        tags.Key,
+        tags.HalfKey,
+        tags.MasterKey,
+        tags.Boss,
+        tags.Hazard,
+        tags.Treasure,
+        tags.Trap,
+        tags.Teleport,
+      ];
+
+      if (start || goal) (item.bg = color.redBg), (item.fg = color.black);
+      else if (node.active) (item.bg = color.blueBg), (item.fg = color.black);
+      else item.bg = color.blackBg;
+
+      if (start) item.text += "Start ";
+      if (goal) item.text += "Goal ";
+
+      for (const tag of tagsToCheck) {
+        if (nodeHasTag(node, tag)) item.text += tag + " ";
+      }
+
+      item.text = item.text.padEnd(9 * 5, " ");
+
+      cells.push(item);
+    }
 
     console.log();
     const write = (edges) => {
