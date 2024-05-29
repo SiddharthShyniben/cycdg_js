@@ -22,15 +22,45 @@ export const drawGraph = ({ graph, appliedRules }) => {
       }
     }
 
-    process.stdout.write(cells.map((x) => x.repeat(9)).join("   "));
+    cells = cells.map((c) =>
+      c.active
+        ? c.start
+          ? {
+              text: "Start".padEnd(9 * 5, " "),
+              bg: color.redBg,
+              fg: color.black,
+            }
+          : c.goal
+            ? {
+                text: "Goal".padEnd(9 * 5, " "),
+                bg: color.redBg,
+                fg: color.black,
+              }
+            : { text: " ".repeat(9 * 5), bg: color.blueBg }
+        : { text: " ".repeat(9 * 5), bg: color.blackBg },
+    );
+
+    const write = () =>
+      process.stdout.write(
+        cells
+          .map((x, i) => {
+            let text = x.text.slice(0, 9);
+            cells[i].text = x.text.slice(9);
+            if (x.bg) text = x.bg(text);
+            if (x.fg) text = x.fg(text);
+            return text;
+          })
+          .join("   "),
+      );
+    write();
     process.stdout.write("\n");
-    process.stdout.write(cells.map((x) => x.repeat(9)).join("   "));
+    write();
     process.stdout.write("\n");
-    process.stdout.write(cells.map((x) => x.repeat(9)).join("   "));
+    write();
     process.stdout.write("\n");
-    process.stdout.write(cells.map((x) => x.repeat(9)).join("   "));
+    write();
     process.stdout.write("\n");
-    process.stdout.write(cells.map((x) => x.repeat(9)).join("   "));
+    write();
     process.stdout.write("\n");
     process.stdout.write("\n");
   }
