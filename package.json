@@ -12,6 +12,8 @@
   "license": "ISC",
   "dependencies": {
     "@nuff-said/color": "^1.0.0",
-    "rand-seed": "^1.0.2"
+    "rand-seed": "^1.0.2",
+    "strip-ansi": "^7.1.0",
+    "unbug": "^1.0.0"
   }
 }
