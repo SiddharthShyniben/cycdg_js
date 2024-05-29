@@ -1,4 +1,5 @@
-import { adjacent, vec } from "./coords.js";
+import unbug from "unbug";
+import { adjacent, fmt, vec } from "./coords.js";
 import {
   graphAddEdgeTagByCoords,
   graphAddNodeTag,
@@ -8,6 +9,8 @@ import {
   tags,
 } from "./graph.js";
 import { rng } from "./rng.js";
+
+const debug = unbug("util");
 
 export const error = (msg) => {
   throw new Error(msg);
@@ -77,7 +80,7 @@ export const areCoordsInRectCorner = (
   { x, y },
   { x: rx, y: ry },
   { x: w, y: h },
-) => (x == rx || x == rx + w - 1) && (y == ry || r == ry + h - 1);
+) => (x == rx || x == rx + w - 1) && (y == ry || y == ry + h - 1);
 
 export const getRandomGraphCoordsByFunc = (graph, fn) => {
   const candidates = [];
@@ -136,23 +139,33 @@ export const moveRandomNodeTag = (graph, from, to) => {
 };
 
 export const pushNodeContensInRandomDirection = (g, c) => {
+  debug(`Pushing ${fmt(c)} contents in random direction`);
+
   const pushTo = getRandomGraphCoordsByFunc(
     g,
     ({ x, y }) => !g.nodes[x][y].active && adjacent(c, { x, y }),
   );
+
+  debug(`Pushing to ${fmt(pushTo)}`);
+
   if (!pushTo || !areAllNodeTagsMovable(g, c)) return;
-  g.nodes[pushTo.x][pushTo.y].enabled = true;
+
+  g.nodes[pushTo.x][pushTo.y].active = true;
   graphEnableDirLinksByCoords(g, c, pushTo);
   graphSwapNodeTags(g, c, pushTo);
 };
 
 export const pushNodeContensInRandomDirectionWithEdgeTag = (g, c, tag) => {
+  debug(`Pushing ${fmt(c)} contents in random direction with edge tags`);
+
   const pushTo = getRandomGraphCoordsByFunc(
     g,
     ({ x, y }) => !g.nodes[x][y].active && adjacent(c, { x, y }),
   );
+
   if (!pushTo || !areAllNodeTagsMovable(g, c)) return;
-  g.nodes[pushTo.x][pushTo.y].enabled = true;
+
+  g.nodes[pushTo.x][pushTo.y].active = true;
   graphEnableDirLinksByCoords(g, c, pushTo);
   graphAddEdgeTagByCoords(g, c, pushTo, tag);
   graphSwapNodeTags(g, c, pushTo);

@@ -1,4 +1,9 @@
 import Rand from "rand-seed";
+import unbug from "unbug";
+
+const debug = unbug("rng");
+const seed = Math.random().toString();
+debug(seed);
 
 export class RNG {
   constructor(seed) {
@@ -23,4 +28,4 @@ export class RNG {
   }
 }
 
-export const rng = new RNG(Math.random().toString());
+export const rng = new RNG(seed);

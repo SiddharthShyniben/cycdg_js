@@ -1,6 +1,11 @@
 import { add, fmt, is, spread, sub, vec, vectorTo } from "./coords.js";
 import { arr2d, error, getAllRectCoordsClockwise } from "./util.js";
 
+import color from "@nuff-said/color";
+import unbug from "unbug";
+
+const debug = unbug("graph");
+
 export const tags = {
   Start: "Start",
   Goal: "Goal",
@@ -288,6 +293,7 @@ export const graphNodeHasTags = (g, { x, y }) => g.nodes[x][y].tags.length > 0;
 export const graphNodeCountTags = (g, { x, y }) => g.nodes[x][y].tags.length;
 export const graphNodeHasTag = (g, { x, y }, kind) =>
   !!g.nodes[x][y].tags.find((t) => t.tag == kind);
+export const nodeHasTag = (n, kind) => !!n.tags.find((t) => t.tag == kind);
 
 export const graphEdgeHasTags = (g, c, v) =>
   graphGetEdgeByVector(g, c, v).tags.length > 0;
@@ -305,7 +311,11 @@ export const copyEdgeTagsPreservingIds = (g, f1, f2, t1, t2) =>
 
 // Drawing ///////////////////////////////////////////////////////////
 
+const draw_ = debug.extend("drawing");
+
 export const drawCardinalConnectedLine = (g, from, to) => {
+  draw_(`Drawing cardinal line from ${fmt(from)} to ${fmt(to)}`);
+
   const [x1, y1] = spread(from);
   const [x2, y2] = spread(to);
 
@@ -318,12 +328,14 @@ export const drawCardinalConnectedLine = (g, from, to) => {
     y = y1;
 
   while (vx != 0 && x !== x2) {
+    draw_(`Moving in ${fmt(vec(vx, vy))}`);
     g.nodes[x + vx][y + vy].active = true;
     graphEnableDirLinkByVector(g, { x, y }, vec(vx, vy));
     x += vx;
   }
 
   while (vy != 0 && y !== y2) {
+    draw_(`Moving in ${fmt(vec(vx, vy))}`);
     g.nodes[x + vx][y + vy].active = true;
     graphEnableDirLinkByVector(g, { x, y }, vec(vx, vy));
     y += vy;
@@ -360,9 +372,20 @@ export const drawBiconnectedDirectionalRect = (
   source,
   sink,
 ) => {
+  draw_(
+    `Drawing biconnected directional rect at ${fmt(start)} of dimensions ${fmt(dimensions)} from ${fmt(source)} to ${fmt(sink)}`,
+  );
+
   const allCoords = getAllRectCoordsClockwise(start, dimensions);
   const sourceIndex = allCoords.findIndex((x) => is(x, source));
   const sinkIndex = allCoords.findIndex((x) => is(x, sink));
+
+  draw_(
+    `All coordinates: ${allCoords
+      .map(fmt)
+      .map((x) => (fmt(source) == x || fmt(sink) == x ? color.red(x) : x))
+      .join(", ")}`,
+  );
 
   g.nodes[source.x][source.y].active = true;
 
@@ -371,6 +394,7 @@ export const drawBiconnectedDirectionalRect = (
     const next = (i + 1) % allCoords.length;
     const c = allCoords[i];
     const v = sub(allCoords[next], c);
+    draw_(`First pass: Linking ${fmt(c)} in ${fmt(v)}`);
     g.nodes[c.x + v.x][c.y + v.y].active = true;
     graphEnableDirLinkByVector(g, c, v);
     i = next;
@@ -381,6 +405,7 @@ export const drawBiconnectedDirectionalRect = (
     const next = i - 1 < 0 ? allCoords.length - 1 : i - 1;
     const c = allCoords[i];
     const v = sub(allCoords[next], c);
+    draw_(`Second pass: Linking ${fmt(c)} in ${fmt(v)}`);
     g.nodes[c.x + v.x][c.y + v.y].active = true;
     graphEnableDirLinkByVector(g, c, v);
     i = next;
