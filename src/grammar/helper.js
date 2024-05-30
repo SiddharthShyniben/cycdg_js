@@ -89,3 +89,34 @@ export const getRandomApplicableCoordsForRule = (rule, graph) => {
 
   return rng.fromArr(candidates);
 };
+
+export const graphHasNoFinalizedNodesNear = (g, { x, y }) => {
+  for (const dir of cardinalDirections) {
+    const node = g.nodes?.[x + dir.x]?.[y + dir.y];
+    if (node && node.finalized) return false;
+  }
+
+  return true;
+};
+
+export const countEmptyEditableNodesNearEnabledOnes = (g) => {
+  let count = 0;
+  const [w, h] = graphSize(g);
+
+  for (let x = 0; x < w; x++) {
+    for (let y = 0; y < h; y++) {
+      const node = g.nodes[x][y];
+      if (node && !node.active && !node.finalized) {
+        for (const dir of cardinalDirections) {
+          const neighbour = g.nodes[x + dir.x]?.[y + dir.y];
+          if (neighbour && neighbour.active) {
+            count++;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  return count;
+};
