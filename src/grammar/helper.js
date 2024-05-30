@@ -1,4 +1,4 @@
-import { cardinalDirections, graphSize } from "../graph.js";
+import { cardinalDirections, diagonalDirections, graphSize } from "../graph.js";
 import { error, range } from "../util.js";
 import { spread } from "../coords.js";
 import { rng } from "../rng.js";
@@ -91,7 +91,7 @@ export const getRandomApplicableCoordsForRule = (rule, graph) => {
 };
 
 export const graphHasNoFinalizedNodesNear = (g, { x, y }) => {
-  for (const dir of cardinalDirections) {
+  for (const dir of [...cardinalDirections, ...diagonalDirections]) {
     const node = g.nodes?.[x + dir.x]?.[y + dir.y];
     if (node && node.finalized) return false;
   }
