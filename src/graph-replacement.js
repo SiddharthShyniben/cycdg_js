@@ -55,7 +55,7 @@ export class GraphReplacementApplier {
       this.teleportsCount =
       this.cyclesCount =
       this.enabledNodesCount =
-      this.finalizeDisabledNodesCount =
+      this.finalizedDisabledNodesCount =
         0;
 
     this.applyRandomInitialRule();

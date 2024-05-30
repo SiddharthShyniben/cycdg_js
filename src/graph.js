@@ -241,8 +241,8 @@ export const graphGetFilledNodesPercentage = (g) => {
   const [w, h] = graphSize(g);
   const total = w * h;
 
-  // return (100 * count + total / 2) / total; // why a bias?
-  return (100 * count) / total;
+  return (100 * count + total / 2) / total; // why a bias?
+  // return (100 * count) / total;
 };
 
 // Tags //////////////////////////////////////////////////////////////

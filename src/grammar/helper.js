@@ -1,4 +1,4 @@
-import { graphSize } from "../graph.js";
+import { cardinalDirections, graphSize } from "../graph.js";
 import { error, range } from "../util.js";
 import { spread } from "../coords.js";
 import { rng } from "../rng.js";
@@ -59,7 +59,7 @@ export const tryFindAllApplicableCoordVariantsRecursively = (
       if (graph.nodes[x][y].finalized) continue;
       if (args.find((a) => a.x == x && a.y == y)) continue;
 
-      if (ir.applicabilityFuncs[index](graph, x, y, ...args)) {
+      if (ir.applicabilityFuncs[index](graph, { x, y }, ...args)) {
         if (index < ir.applicabilityFuncs.length - 1) {
           const res = tryFindAllApplicableCoordVariantsRecursively(
             ir,
@@ -68,7 +68,7 @@ export const tryFindAllApplicableCoordVariantsRecursively = (
           );
           if (res.length > 0) result.push(res);
         } else {
-          result.push(...args, vec(x, y));
+          result.push(...args, { x, y });
         }
       }
     }
