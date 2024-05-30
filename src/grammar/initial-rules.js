@@ -145,14 +145,20 @@ export default [
       const rw = rng.randInRange(3, w - x),
         rh = rng.randInRange(3, h - y);
 
+      debug(`drawing rect of size ${fmt(rw, rh)}`);
+
       const start = getRandomGraphCoordsByFunc(g, (c) =>
         areCoordsOnRect(c, { x, y }, vec(rw, rh)),
       );
+
+      debug(`start: ${fmt(start)}`);
 
       const goal = getRandomGraphCoordsByFunc(
         g,
         (c) => areCoordsOnRect(c, { x, y }, vec(rw, rh)) && adjacent(start, c),
       );
+
+      debug(`goal: ${fmt(goal)}`);
 
       drawBiconnectedDirectionalRect(g, { x, y }, vec(rw, rh), start, goal);
       graphAddNodeTag(g, start, tags.Start);
@@ -169,6 +175,10 @@ export default [
           const goal = getRandomGraphCoordsByFunc(g, (c) =>
             graphNodeHasTag(g, c, tags.Goal),
           );
+
+          feat(`start: ${fmt(start)}`);
+          feat(`goal: ${fmt(goal)}`);
+
           graphAddEdgeTagByCoords(g, start, goal, tags.WindowEdge);
         },
       },
@@ -182,11 +192,18 @@ export default [
           const goal = getRandomGraphCoordsByFunc(g, (c) =>
             graphNodeHasTag(g, c, tags.Goal),
           );
+
+          feat(`start: ${fmt(start)}`);
+          feat(`goal: ${fmt(goal)}`);
+
           const c1 = getRandomGraphCoordsByFunc(
             g,
             (c) =>
               g.nodes[c.x][c.y].active && !is(start, c) && !adjacent(start, c),
           );
+
+          feat(`key: ${fmt(c1)}`);
+
           graphAddNodeTag(g, c1, tags.Key);
           graphAddEdgeTagByCoords(g, start, goal, tags.LockedEdge);
         },

@@ -7,6 +7,10 @@ import {
   isRuleApplicableForGraph,
 } from "./grammar/helper.js";
 import { rng } from "./rng.js";
+import unbug from "unbug";
+import { fmt } from "./coords.js";
+
+const debug = unbug("applier");
 
 export class GraphReplacementApplier {
   constructor(
@@ -58,6 +62,7 @@ export class GraphReplacementApplier {
   }
 
   applyRandomInitialRule() {
+    debug("Applying random inital rule");
     const rule = allInitalRules[rng.randInRange(allInitalRules.length)];
     if (isRuleApplicableForGraph(rule, this.graph)) this.applyInitialRule(rule);
     else console.error("Rule failed!", rule.name);
@@ -66,11 +71,20 @@ export class GraphReplacementApplier {
 
   applyInitialRule(rule) {
     const c = getRandomApplicableCoordsForRule(rule, this.graph);
+
+    debug(`Applying ${rule.name} at ${fmt(c)}`);
     rule.applyOnGraphAt(this.graph, c);
 
     const appliedFeature = rng.fromArr(rule.mandatoryFeatures);
+
+    debug(`Applying feature ${appliedFeature.name}`);
     appliedFeature.applyFeature(this.graph);
-    if (rule.addsCycle) this.cyclesCount++;
+
+    if (rule.addsCycle) {
+      this.cyclesCount++;
+      debug(`Cycle count increased to ${this.cyclesCount}`);
+    }
+
     this.appliedRulesCount++;
     this.appliedRules.push({
       name: rule.name,
