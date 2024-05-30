@@ -1,12 +1,6 @@
 import unbug from "unbug";
 import { fmt } from "./coords.js";
-import {
-  graphNodeHasTag,
-  graphSize,
-  nodeHasTag,
-  tags,
-  testSanity,
-} from "./graph.js";
+import { graphSize, nodeHasTag, tags, testSanity } from "./graph.js";
 import { range } from "./util.js";
 
 import color from "@nuff-said/color";
@@ -15,6 +9,7 @@ import { stripAnsi } from "unbug/src/util.js";
 const debug = unbug("render");
 
 export const drawGraph = ({ graph, appliedRules }) => {
+  console.clear();
   debug(graph);
   const sanity = testSanity(graph);
   if (!sanity.sane) {
@@ -49,6 +44,8 @@ export const drawGraph = ({ graph, appliedRules }) => {
       const goal = nodeHasTag(node, tags.Goal);
 
       const tagsToCheck = [
+        tags.Start,
+        tags.Goal,
         tags.Key,
         tags.HalfKey,
         tags.MasterKey,
@@ -61,14 +58,14 @@ export const drawGraph = ({ graph, appliedRules }) => {
 
       if (start || goal) (item.bg = color.redBg), (item.fg = color.black);
       else if (node.active) (item.bg = color.blueBg), (item.fg = color.black);
+      else if (node.finalized) item.bg = color.yellowBg;
       else item.bg = color.blackBg;
 
-      if (start) item.text += "Start ";
-      if (goal) item.text += "Goal ";
-
+      const t = [];
       for (const tag of tagsToCheck) {
-        if (nodeHasTag(node, tag)) item.text += tag + " ";
+        if (nodeHasTag(node, tag)) t.push(tag);
       }
+      item.text = t.join(", ");
 
       item.text = item.text.padEnd(9 * 5, " ");
 
@@ -132,8 +129,16 @@ export const drawGraph = ({ graph, appliedRules }) => {
 
   console.log();
   for (const rule of appliedRules) {
+    const mandatoryText = rule.mandatoryFeature
+      ? color.blue(` ${rule.mandatoryFeature}`)
+      : "";
+
+    const optionalText = rule.optionalFeature
+      ? color.blue(` (+${rule.optionalFeature})`)
+      : "";
+
     console.log(
-      `> ${color.bold(rule.name)} ${color.dim(fmt(rule.coords))}${rule.mandatoryFeature ? color.blue(` +${rule.mandatoryFeature}`) : ""}`,
+      `> ${color.bold(rule.name.padEnd(20, " "))} ${color.dim(fmt(rule.coords))}${mandatoryText}${optionalText}`,
     );
   }
 };
