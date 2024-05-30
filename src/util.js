@@ -52,25 +52,6 @@ export const getAllRectCoordsClockwise = ({ x, y }, { x: w, y: h }) => {
   return coords;
 };
 
-export const weightedRandom = (items, weights) => {
-  const cumulativeWeights = [];
-  for (let i = 0; i < weights.length; i += 1) {
-    cumulativeWeights[i] = weights[i] + (cumulativeWeights[i - 1] || 0);
-  }
-
-  const maxCumulativeWeight = cumulativeWeights[cumulativeWeights.length - 1];
-  const randomNumber = maxCumulativeWeight * rng.rand();
-
-  for (let itemIndex = 0; itemIndex < items.length; itemIndex += 1) {
-    if (cumulativeWeights[itemIndex] >= randomNumber) {
-      return {
-        item: items[itemIndex],
-        index: itemIndex,
-      };
-    }
-  }
-};
-
 export const areCoordsOnRect = ({ x, y }, { x: rx, y: ry }, { x: w, y: h }) =>
   x < rx || x >= rx + w || y < ry || y >= ry + h
     ? false

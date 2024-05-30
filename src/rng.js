@@ -26,6 +26,17 @@ export class RNG {
   fromArr(array) {
     return array[this.randInRange(0, array.length)];
   }
+
+  weightedFromArr(items, fn) {
+    const weights = items.map(fn);
+    const weighted = [];
+
+    for (let i = 0; i < items.length; i++) {
+      for (let j = 0; j < weights[i]; j++) weighted.push(items[i]);
+    }
+
+    return this.fromArr(weighted);
+  }
 }
 
 export const rng = new RNG(seed);
