@@ -12,6 +12,7 @@ import { rng } from "./rng.js";
 import unbug from "unbug";
 import { fmt } from "./coords.js";
 import replacementRules from "./grammar/replacement-rules.js";
+import logUpdate from "log-update";
 
 const debug = unbug("applier");
 
@@ -82,6 +83,7 @@ export class GraphReplacementApplier {
 
     while (tries < 10000) {
       tries++;
+      logUpdate(`> Try ${tries}/10000`);
       rule = this.selectRandomRuleToApply();
       if (!rule) continue;
       coords = tryFindAllApplicableCoordVariantsRecursively(rule, this.graph);
@@ -91,6 +93,9 @@ export class GraphReplacementApplier {
         return false;
       }
     }
+
+    logUpdate.clear();
+    logUpdate.done();
 
     return true;
   }
