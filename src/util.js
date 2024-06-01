@@ -4,6 +4,7 @@ import {
   graphAddEdgeTagByCoords,
   graphAddNodeTag,
   graphEnableDirLinksByCoords,
+  graphNodeHasTags,
   graphSize,
   graphSwapNodeTags,
   tags,
@@ -99,7 +100,7 @@ export const getRandomGraphCoordsByScore = (graph, fn) => {
     }
   }
 
-  return weightedRandom(candidates, scores);
+  return rng.weightedFromArr(candidates, scores);
 };
 
 export const doesGraphContainNodeTag = (g, tag) =>
