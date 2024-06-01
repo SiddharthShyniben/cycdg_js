@@ -9,7 +9,7 @@ import { stripAnsi } from "unbug/src/util.js";
 const debug = unbug("render");
 
 export const drawGraph = ({ graph, appliedRules }) => {
-  console.clear();
+  // console.clear();
   debug(graph);
   const sanity = testSanity(graph);
   if (!sanity.sane) {
@@ -86,7 +86,10 @@ export const drawGraph = ({ graph, appliedRules }) => {
             const edge = cells[i].node.edges[0];
             if (edge.enabled) {
               addEdgeMarker = true;
-              if (edge.reversed) edgeMarker = " ← ";
+              if (edge.reversed) {
+                if (nodeHasTag(edge, tags.LockedEdge)) edgeMarker = "←/-";
+                else edgeMarker = " ← ";
+              } else if (nodeHasTag(edge, tags.LockedEdge)) edgeMarker = "-/→";
             }
           }
 
