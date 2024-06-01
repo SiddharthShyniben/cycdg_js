@@ -184,7 +184,7 @@ export const doGraphCoordsHaveIncomingLinksOnly = (g, coords) => {
 
 export const graphEnableDirLinkByVector = (g, { x, y }, { x: vx, y: vy }) => {
   if (vx * vy !== 0)
-    error(`Diagonal connection: ${fmt({ x, y })} -> ${fmt({ x, y })}`);
+    error(`Diagonal connection: ${fmt({ x, y })} -> ${fmt(vec(vx, vy))}`);
 
   let reverse = false;
 
