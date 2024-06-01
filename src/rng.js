@@ -28,7 +28,10 @@ export class RNG {
   }
 
   weightedFromArr(items, fn) {
-    const weights = items.map(fn);
+    let weights = items.map(fn);
+
+    const negative = weights.filter((w) => w < 0).sort((a, b) => a - b);
+    if (negative.length > 0) weights = weights.map((w) => w + negative[0] + 1);
     const weighted = [];
 
     for (let i = 0; i < items.length; i++) {
