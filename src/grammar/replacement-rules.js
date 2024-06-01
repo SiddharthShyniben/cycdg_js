@@ -1,6 +1,8 @@
-import { adjacent, vec } from "../coords.js";
+import { adjacent, isCardinal, vec } from "../coords.js";
 import {
+  areGraphCoordsInterlinked,
   graphAddNodeTag,
+  graphEnableDirLinksByCoords,
   graphNodeHasTags,
   graphSize,
   tags,
@@ -11,6 +13,7 @@ import {
   randomHazard,
 } from "../util.js";
 import { graphHasNoFinalizedNodesNear } from "./helper.js";
+import { makeKeyLockFeature } from "./util.js";
 
 export default [
   {
@@ -101,5 +104,23 @@ export default [
         applyFeature: (g, where) => graphAddNodeTag(g, where, randomHazard()),
       },
     ],
+  },
+  {
+    name: "connect",
+    metadata: {
+      addsCycle: true,
+      changesCoords: 2,
+    },
+    searchNearPrevIndex: [-1, 0],
+    applicabilityFuncs: [
+      (g, { x, y }) => g.nodes[x][y].active,
+      (g, { x, y }, prev) =>
+        g.nodes[x][y].active &&
+        isCardinal(prev, { x, y }) &&
+        !areGraphCoordsInterlinked(g, { x, y }, prev) &&
+        adjacent(prev, { x, y }),
+    ],
+    applyToGraph: (g, [a, b]) => graphEnableDirLinksByCoords(g, a, b),
+    mandatoryFeatures: [makeKeyLockFeature()],
   },
 ];
