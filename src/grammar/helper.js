@@ -36,14 +36,16 @@ export const tryFindAllApplicableCoordVariantsRecursively = (
   graph,
   ...args
 ) => {
+  const prefix = "   ".repeat(args.length);
   debug(
-    `try find all applicable coordinate variants recursively for ${ir.name}`,
+    prefix +
+      `try find all applicable coordinate variants recursively for ${ir.name}`,
+    args,
   );
-  debug(args);
   const index = args.length;
   const [w, h] = graphSize(graph);
 
-  debug(`graph size: ${fmt(vec(w, h))}`);
+  debug(prefix + `graph size: ${fmt(vec(w, h))}`);
 
   const result = [];
   let xFrom = 0,
@@ -55,11 +57,11 @@ export const tryFindAllApplicableCoordVariantsRecursively = (
     error(`Rule ${ir.name} has wrong searchNearPrevIndex count`);
 
   if (ir.searchNearPrevIndex[index] != -1) {
-    debug("found search near prev index");
+    debug(prefix + "found search near prev index");
     const [searchNearX, searchNearY] = spread(
       args[ir.searchNearPrevIndex[index]],
     );
-    debug(`search near ${fmt(searchNearX, searchNearY)}`);
+    debug(prefix + `search near ${fmt(searchNearX, searchNearY)}`);
 
     xFrom = Math.max(searchNearX - 1, 0);
     yFrom = Math.max(searchNearY - 1, 0);
@@ -68,7 +70,10 @@ export const tryFindAllApplicableCoordVariantsRecursively = (
     yTo = Math.min(searchNearY + 1, h - 1);
   }
 
-  debug(`Searching from ${fmt(vec(xFrom, yFrom))} to ${fmt(vec(xTo, yTo))}`);
+  debug(
+    prefix +
+      `Searching from ${fmt(vec(xFrom, yFrom))} to ${fmt(vec(xTo, yTo))}`,
+  );
 
   for (const x of range(xFrom, xTo + 1)) {
     for (const y of range(yFrom, yTo + 1)) {
@@ -78,7 +83,9 @@ export const tryFindAllApplicableCoordVariantsRecursively = (
 
       if (args.find((a) => is(a, { x, y }))) continue;
 
+      debug(prefix, { x, y }, args);
       if (ir.applicabilityFuncs[index](graph, { x, y }, ...args)) {
+        debug(prefix + `match! ${fmt({ x, y })}, ${args}`);
         if (index < ir.applicabilityFuncs.length - 1) {
           const res = tryFindAllApplicableCoordVariantsRecursively(
             ir,
