@@ -19,6 +19,7 @@ export default [
     metadata: {
       additionalWeight: -2,
       finalizesDisabledNodes: 2,
+      changesCoords: 2,
     },
     searchNearPrevIndex: [-1, 0],
     applicabilityFuncs: [

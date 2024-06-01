@@ -138,7 +138,7 @@ export const drawGraph = ({ graph, appliedRules }) => {
       : "";
 
     console.log(
-      `> ${color.bold(rule.name.padEnd(20, " "))} ${color.dim(fmt(rule.coords))}${mandatoryText}${optionalText}`,
+      `> ${color.bold(rule.name.padEnd(20, " "))} ${color.dim(Array.isArray(rule.coords) ? rule.coords.slice(0, rule.metadata.changesCoords).map(fmt).join(", ") : fmt(rule.coords))}${mandatoryText}${optionalText}`,
     );
   }
 };

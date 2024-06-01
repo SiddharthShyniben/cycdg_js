@@ -267,6 +267,7 @@ export class GraphReplacementApplier {
       coords: c,
       mandatoryFeature: mandatoryFeature?.name,
       optionalFeature: optionalFeature?.name,
+      metadata: rule.metadata,
     });
   }
 }
