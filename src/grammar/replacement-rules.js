@@ -1,6 +1,15 @@
-import { adjacent, spread, vec } from "../coords.js";
-import { graphSize } from "../graph.js";
-import { areCoordsAdjacentToRectCorner, areCoordsOnRect } from "../util.js";
+import { adjacent, vec } from "../coords.js";
+import {
+  graphAddNodeTag,
+  graphNodeHasTags,
+  graphSize,
+  tags,
+} from "../graph.js";
+import {
+  areCoordsAdjacentToRectCorner,
+  areCoordsOnRect,
+  randomHazard,
+} from "../util.js";
 import { graphHasNoFinalizedNodesNear } from "./helper.js";
 
 export default [
@@ -53,8 +62,7 @@ export default [
       (g, { x, y }, p, q) => {
         const [w, h] = graphSize(g);
 
-        // Prevent a not yet used node from being locked by a finalized L-shape in a corner.
-        // Removal of this check causes a creation of unfillable nodes.
+        // Prevent L shape closing away the corner of the map
         if (
           areCoordsAdjacentToRectCorner({ x, y }, vec(0), vec(w, h)) &&
           areCoordsAdjacentToRectCorner(p, vec(0), vec(w, h)) &&
@@ -72,5 +80,26 @@ export default [
     ],
     applyToGraph: (g, nodes) =>
       nodes.slice(0, 3).map(({ x, y }) => (g.nodes[x][y].finalized = true)),
+  },
+  {
+    name: "thing",
+    metadata: {
+      additionalWeight: -4,
+    },
+    searchNearPrevIndex: [-1],
+    applicabilityFuncs: [
+      (g, { x, y }) => g.nodes[x][y].active && !graphNodeHasTags(g, { x, y }),
+    ],
+    applyToGraph: () => {},
+    mandatoryFeatures: [
+      {
+        name: "treasure",
+        applyFeature: (g, where) => graphAddNodeTag(g, where, tags.Treasure),
+      },
+      {
+        name: "hazard",
+        applyFeature: (g, where) => graphAddNodeTag(g, where, randomHazard()),
+      },
+    ],
   },
 ];
