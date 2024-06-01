@@ -39,6 +39,7 @@ export const tryFindAllApplicableCoordVariantsRecursively = (
   debug(
     `try find all applicable coordinate variants recursively for ${ir.name}`,
   );
+  debug(args);
   const index = args.length;
   const [w, h] = graphSize(graph);
 
@@ -84,7 +85,8 @@ export const tryFindAllApplicableCoordVariantsRecursively = (
             graph,
             ...[...args, { x, y }],
           );
-          if (res.length > 0) result.push(res);
+          if (res.length > 0)
+            result.push(...(Array.isArray(res[0]) ? res : [res]));
         } else {
           result.push(...args, { x, y });
         }

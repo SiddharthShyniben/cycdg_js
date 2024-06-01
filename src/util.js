@@ -63,6 +63,14 @@ export const areCoordsInRectCorner = (
   { x: w, y: h },
 ) => (x == rx || x == rx + w - 1) && (y == ry || y == ry + h - 1);
 
+export const areCoordsAdjacentToRectCorner = (
+  { x, y },
+  { x: rx, y: ry },
+  { x: w, y: h },
+) =>
+  ((x == rx || x == rx + w - 1) && (y == ry + 1 || y == ry + h - 2)) ||
+  ((x == rx + 1 || x == rx + w - 2) && (y == ry || y == ry + h - 1));
+
 export const getRandomGraphCoordsByFunc = (graph, fn) => {
   const candidates = [];
   const [w, h] = graphSize(graph);
