@@ -13,7 +13,14 @@ import {
   randomHazard,
 } from "../util.js";
 import { graphHasNoFinalizedNodesNear } from "./helper.js";
-import { makeKeyLockFeature } from "./util.js";
+import {
+  makeKeyLockFeature,
+  makeMasterLockFeature,
+  makeOneTimePassageFeature,
+  makeOneWayPassageFeature,
+  makeSecretPassageFeature,
+  makeWindowPassageFeature,
+} from "./util.js";
 
 export default [
   {
@@ -121,6 +128,13 @@ export default [
         adjacent(prev, { x, y }),
     ],
     applyToGraph: (g, [a, b]) => graphEnableDirLinksByCoords(g, a, b),
-    mandatoryFeatures: [makeKeyLockFeature()],
+    mandatoryFeatures: [
+      makeKeyLockFeature(),
+      makeMasterLockFeature(),
+      makeSecretPassageFeature(),
+      makeWindowPassageFeature(),
+      makeOneTimePassageFeature(),
+      makeOneWayPassageFeature(),
+    ],
   },
 ];

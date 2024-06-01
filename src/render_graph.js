@@ -9,7 +9,7 @@ import { stripAnsi } from "unbug/src/util.js";
 const debug = unbug("render");
 
 export const drawGraph = ({ graph, appliedRules }) => {
-  // console.clear();
+  console.clear();
   debug(graph);
   const sanity = testSanity(graph);
   if (!sanity.sane) {
