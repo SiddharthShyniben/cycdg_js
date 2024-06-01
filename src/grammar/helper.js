@@ -1,7 +1,10 @@
 import { cardinalDirections, diagonalDirections, graphSize } from "../graph.js";
 import { error, range } from "../util.js";
-import { spread } from "../coords.js";
+import { fmt, is, spread, vec } from "../coords.js";
 import { rng } from "../rng.js";
+import unbug from "unbug";
+
+const debug = unbug("helper");
 
 export const isRuleApplicableForGraph = (rule, graph) => {
   const [w, h] = graphSize(graph);
@@ -33,8 +36,13 @@ export const tryFindAllApplicableCoordVariantsRecursively = (
   graph,
   ...args
 ) => {
+  debug(
+    `try find all applicable coordinate variants recursively for ${ir.name}`,
+  );
   const index = args.length;
   const [w, h] = graphSize(graph);
+
+  debug(`graph size: ${fmt(vec(w, h))}`);
 
   const result = [];
   let xFrom = 0,
@@ -42,29 +50,39 @@ export const tryFindAllApplicableCoordVariantsRecursively = (
   let yFrom = 0,
     yTo = h - 1;
 
-  if (ir.searchNearPrevIndex < ir.applicabilityFuncs)
+  if (ir.searchNearPrevIndex.length !== ir.applicabilityFuncs.length)
     error(`Rule ${ir.name} has wrong searchNearPrevIndex count`);
 
   if (ir.searchNearPrevIndex[index] != -1) {
+    debug("found search near prev index");
     const [searchNearX, searchNearY] = spread(
       args[ir.searchNearPrevIndex[index]],
     );
-    (xFrom = Math.max(searchNearX - 1, 0)), (yFrom = Math.max(searchNearY - 1));
-    (xTo = Math.min(searchNearX + 1, w - 1)),
-      (yTo = Math.max(searchNearY + 1, h - 1));
+    debug(`search near ${fmt(searchNearX, searchNearY)}`);
+
+    xFrom = Math.max(searchNearX - 1, 0);
+    yFrom = Math.max(searchNearY - 1, 0);
+
+    xTo = Math.min(searchNearX + 1, w - 1);
+    yTo = Math.min(searchNearY + 1, h - 1);
   }
 
-  for (const x of range(xFrom, xTo)) {
-    for (const y of range(yFrom, yTo)) {
-      if (graph.nodes[x][y].finalized) continue;
-      if (args.find((a) => a.x == x && a.y == y)) continue;
+  debug(`Searching from ${fmt(vec(xFrom, yFrom))} to ${fmt(vec(xTo, yTo))}`);
+
+  for (const x of range(xFrom, xTo + 1)) {
+    for (const y of range(yFrom, yTo + 1)) {
+      if (!ir.worksWithFinalizedNodes) {
+        if (graph.nodes[x][y].finalized) continue;
+      }
+
+      if (args.find((a) => is(a, { x, y }))) continue;
 
       if (ir.applicabilityFuncs[index](graph, { x, y }, ...args)) {
         if (index < ir.applicabilityFuncs.length - 1) {
           const res = tryFindAllApplicableCoordVariantsRecursively(
             ir,
             graph,
-            ...[...args, vec(x, y)],
+            ...[...args, { x, y }],
           );
           if (res.length > 0) result.push(res);
         } else {
