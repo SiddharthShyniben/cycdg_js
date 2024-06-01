@@ -123,9 +123,10 @@ export const moveRandomNodeTag = (graph, from, to) => {
 
   const tag = rng.fromArr(tags);
   if (!isTagMovable(tag)) return null;
+  const i = tags.indexOf(tag);
 
   graph.nodes[to.x][to.y].tags.push(tag);
-  graph.nodes[from.y][from.y].splice(i, 1);
+  graph.nodes[from.x][from.y].tags.splice(i, 1);
 };
 
 export const pushNodeContensInRandomDirection = (g, c) => {

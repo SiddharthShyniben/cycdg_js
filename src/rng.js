@@ -2,11 +2,13 @@ import Rand from "rand-seed";
 import unbug from "unbug";
 
 const debug = unbug("rng");
-const seed = Math.random().toString();
+// const seed = Math.random().toString();
+const seed = "0.4468449949022766";
 debug(seed);
 
 export class RNG {
   constructor(seed) {
+    this.seed = seed;
     this.rng = new Rand.default(seed);
   }
 

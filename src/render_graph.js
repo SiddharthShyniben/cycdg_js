@@ -1,16 +1,14 @@
-import unbug from "unbug";
 import { fmt } from "./coords.js";
 import { graphSize, nodeHasTag, tags, testSanity } from "./graph.js";
 import { range } from "./util.js";
 
 import color from "@nuff-said/color";
 import { stripAnsi } from "unbug/src/util.js";
-
-const debug = unbug("render");
+import { rng } from "./rng.js";
 
 export const drawGraph = ({ graph, appliedRules }) => {
   console.clear();
-  debug(graph);
+  console.log(rng.seed);
   const sanity = testSanity(graph);
   if (!sanity.sane) {
     console.log();
@@ -82,14 +80,25 @@ export const drawGraph = ({ graph, appliedRules }) => {
           let addEdgeMarker = false;
           let edgeMarker = " → ";
 
+          // TODO: color locks
           if (edges) {
             const edge = cells[i].node.edges[0];
             if (edge.enabled) {
               addEdgeMarker = true;
               if (edge.reversed) {
-                if (nodeHasTag(edge, tags.LockedEdge)) edgeMarker = "←/-";
+                if (nodeHasTag(edge, tags.LockedEdge)) edgeMarker = " ↤ ";
+                else if (nodeHasTag(edge, tags.MasterLockedEdge))
+                  edgeMarker = " ⬅ ";
+                else if (nodeHasTag(edge, tags.SecretEdge)) edgeMarker = " ⇐ ";
+                else if (nodeHasTag(edge, tags.WindowEdge)) edgeMarker = " ⇠ ";
                 else edgeMarker = " ← ";
-              } else if (nodeHasTag(edge, tags.LockedEdge)) edgeMarker = "-/→";
+              } else {
+                if (nodeHasTag(edge, tags.LockedEdge)) edgeMarker = " ↦ ";
+                else if (nodeHasTag(edge, tags.MasterLockedEdge))
+                  edgeMarker = " ➡ ";
+                else if (nodeHasTag(edge, tags.SecretEdge)) edgeMarker = " ⇒ ";
+                else if (nodeHasTag(edge, tags.WindowEdge)) edgeMarker = " ⇢ ";
+              }
             }
           }
 
@@ -123,7 +132,25 @@ export const drawGraph = ({ graph, appliedRules }) => {
       if (edge.enabled) {
         toPrint =
           toPrint.slice(0, i * 12 + 4) +
-          (edge.reversed ? "↑" : "↓") +
+          (edge.reversed
+            ? nodeHasTag(edge, tags.SecretEdge)
+              ? "⇑"
+              : nodeHasTag(edge, tags.LockedEdge)
+                ? "↥"
+                : nodeHasTag(edge, tags.MasterLockedEdge)
+                  ? "⬆"
+                  : nodeHasTag(edge, tags.WindowEdge)
+                    ? "⇡"
+                    : "↑"
+            : nodeHasTag(edge, tags.SecretEdge)
+              ? "⇓"
+              : nodeHasTag(edge, tags.LockedEdge)
+                ? "↧"
+                : nodeHasTag(edge, tags.MasterLockedEdge)
+                  ? "⬇"
+                  : nodeHasTag(edge, tags.WindowEdge)
+                    ? "⇣"
+                    : "↓") +
           toPrint.slice(i * 12 + 4);
       }
     }

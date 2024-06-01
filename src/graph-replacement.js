@@ -127,7 +127,7 @@ export class GraphReplacementApplier {
   applyReplacementRule(rule, coords) {
     const c = rng.fromArr(coords);
 
-    debug(`Applying ${rule.name} at ${fmt(c)}`);
+    debug("Applying", rule.name, "at", c);
 
     const mandatoryFeature = this.selectRandomMandatoryFeatureToApply(rule);
     if (mandatoryFeature && mandatoryFeature.prepareFeature)
@@ -230,7 +230,7 @@ export class GraphReplacementApplier {
   selectRandomOptionalFeatureToApply(rule) {
     if (this.shouldFeatureBeAdded() && rule.optionalFeatures) {
       return rng.weightedFromArr(
-        rule.optionalFeature,
+        rule.optionalFeatures,
         (x) => x.additionalWeight + BASE_RULE_WEIGHT,
       );
     }

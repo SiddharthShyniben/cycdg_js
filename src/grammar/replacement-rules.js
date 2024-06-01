@@ -10,6 +10,7 @@ import {
 import {
   areCoordsAdjacentToRectCorner,
   areCoordsOnRect,
+  moveRandomNodeTag,
   randomHazard,
 } from "../util.js";
 import { graphHasNoFinalizedNodesNear } from "./helper.js";
@@ -19,6 +20,7 @@ import {
   makeOneTimePassageFeature,
   makeOneWayPassageFeature,
   makeSecretPassageFeature,
+  makeTagAdder,
   makeWindowPassageFeature,
 } from "./util.js";
 
@@ -104,11 +106,11 @@ export default [
     mandatoryFeatures: [
       {
         name: "treasure",
-        applyFeature: (g, where) => graphAddNodeTag(g, where, tags.Treasure),
+        applyFeature: (g, node) => graphAddNodeTag(g, node, tags.Treasure),
       },
       {
         name: "hazard",
-        applyFeature: (g, where) => graphAddNodeTag(g, where, randomHazard()),
+        applyFeature: (g, node) => graphAddNodeTag(g, node, randomHazard()),
       },
     ],
   },
@@ -123,9 +125,8 @@ export default [
       (g, { x, y }) => g.nodes[x][y].active,
       (g, { x, y }, prev) =>
         g.nodes[x][y].active &&
-        isCardinal(prev, { x, y }) &&
-        !areGraphCoordsInterlinked(g, { x, y }, prev) &&
-        adjacent(prev, { x, y }),
+        adjacent(prev, { x, y }) &&
+        !areGraphCoordsInterlinked(g, { x, y }, prev),
     ],
     applyToGraph: (g, [a, b]) => graphEnableDirLinksByCoords(g, a, b),
     mandatoryFeatures: [
@@ -135,6 +136,32 @@ export default [
       makeWindowPassageFeature(),
       makeOneTimePassageFeature(),
       makeOneWayPassageFeature(),
+    ],
+  },
+  {
+    name: "add node",
+    metadata: {
+      enablesNodes: 1,
+      changesCoords: 2,
+    },
+    searchNearPrevIndex: [-1, 0],
+    applicabilityFuncs: [
+      (g, { x, y }) => g.nodes[x][y].active,
+      (g, { x, y }, prev) => !g.nodes[x][y].active && adjacent(prev, { x, y }),
+    ],
+    applyToGraph: (g, [a, b]) => {
+      g.nodes[b.x][b.y].active = true;
+      graphEnableDirLinksByCoords(g, a, b);
+      moveRandomNodeTag(g, a, b);
+    },
+    mandatoryFeatures: [
+      makeKeyLockFeature(),
+      makeMasterLockFeature(),
+      makeSecretPassageFeature(),
+    ],
+    optionalFeatures: [
+      makeTagAdder(tags.Boss, 1),
+      makeTagAdder(tags.Treasure, 1),
     ],
   },
 ];
