@@ -17,9 +17,11 @@ process.stdin.on("keypress", function (_, key) {
       let done = false;
 
       if (key.name == "return") {
-        while (!done) done = GRA.applyRandomReplacementRule();
+        while (!GRA.filledEnough() || !done) {
+          done = GRA.applyRandomReplacementRule();
 
-        drawGraph(GRA);
+          drawGraph(GRA);
+        }
       } else {
         done = GRA.applyRandomReplacementRule();
 

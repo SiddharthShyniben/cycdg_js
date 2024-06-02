@@ -15,6 +15,7 @@
     "keypress": "^0.2.1",
     "log-update": "^6.0.0",
     "rand-seed": "^1.0.2",
+    "slice-ansi": "^7.1.0",
     "strip-ansi": "^7.1.0",
     "unbug": "^1.0.0"
   }

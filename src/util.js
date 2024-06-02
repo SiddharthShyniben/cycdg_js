@@ -1,4 +1,5 @@
 import unbug from "unbug";
+import color from "@nuff-said/color";
 import { adjacent, fmt, vec } from "./coords.js";
 import {
   graphAddEdgeTagByCoords,
@@ -7,6 +8,7 @@ import {
   graphNodeHasTags,
   graphSize,
   graphSwapNodeTags,
+  nodeHasTag,
   tags,
 } from "./graph.js";
 import { rng } from "./rng.js";
@@ -108,7 +110,7 @@ export const doesGraphContainNodeTag = (g, tag) =>
 
 export const isTagMovable = (tag) =>
   [tags.Key, tags.HalfKey, tags.MasterKey, tags.Start, tags.Teleport].indexOf(
-    tag.kind,
+    tag.tag ?? tag,
   ) < 0; // TODO: allow teleports somehow?
 
 export const areAllNodeTagsMovable = (g, { x, y }) =>
@@ -172,3 +174,57 @@ export const addTagAtRandomActiveNode = (graph, tag) =>
   );
 
 export const clamp = (num, min, max) => Math.max(Math.min(num, max), min);
+
+export const arrows = {
+  up: {
+    default: "↑",
+    masterlocked: color.red("⇧"),
+    locked: "⇧",
+    secret: color.dim("↑"),
+    window: "⇡",
+    oneWay: color.cyan("↑"),
+    oneTime: color.yellow("↑"),
+  },
+  down: {
+    default: "↓",
+    masterlocked: color.red("⇩"),
+    locked: "⇩",
+    secret: color.dim("↓"),
+    window: "⇣",
+    oneWay: color.cyan("↓"),
+    oneTime: color.yellow("↓"),
+  },
+  left: {
+    default: "←",
+    masterlocked: color.red("⇦"),
+    locked: "⇦",
+    secret: color.dim("←"),
+    window: "⇠",
+    oneWay: color.cyan("←"),
+    oneTime: color.yellow("←"),
+  },
+  right: {
+    default: "→",
+    masterlocked: color.red("⇨"),
+    locked: "⇨",
+    secret: color.dim("→"),
+    window: "⇢",
+    oneWay: color.cyan("→"),
+    oneTime: color.yellow("→"),
+  },
+};
+
+export const getArrow = (edge, dir) =>
+  nodeHasTag(edge, tags.MasterLockedEdge)
+    ? arrows[dir].masterlocked
+    : nodeHasTag(edge, tags.LockedEdge)
+      ? arrows[dir].locked
+      : nodeHasTag(edge, tags.SecretEdge)
+        ? arrows[dir].secret
+        : nodeHasTag(edge, tags.WindowEdge)
+          ? arrows[dir].window
+          : nodeHasTag(edge, tags.OneWayEdge)
+            ? arrows[dir].oneWay
+            : nodeHasTag(edge, tags.OneTimeEdge)
+              ? arrows[dir].oneTime
+              : arrows[dir].default;

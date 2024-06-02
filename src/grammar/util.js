@@ -1,5 +1,6 @@
 import {
   graphAddEdgeTagByCoords,
+  graphAddEdgeTagByCoordsPreserveLastId,
   graphAddNodeTag,
   graphEnableDirLinksByCoords,
   tags,
@@ -29,6 +30,24 @@ export const makeMasterLockFeature = (a = 0, b = 1) => ({
   },
   applyFeature: (g, coords) => {
     graphAddEdgeTagByCoords(g, coords[a], coords[b], tags.MasterLockedEdge);
+  },
+});
+
+export const makeTwoMasterLockFeature = (a, b, c, d) => ({
+  name: "master lock",
+  additionalWeight: -5,
+  prepareFeature: (g) => {
+    if (!doesGraphContainNodeTag(g, tags.MasterKey))
+      addTagAtRandomActiveNode(g, tags.MasterKey);
+  },
+  applyFeature: (g, coords) => {
+    graphAddEdgeTagByCoords(g, coords[a], coords[b], tags.MasterLockedEdge);
+    graphAddEdgeTagByCoordsPreserveLastId(
+      g,
+      coords[c],
+      coords[d],
+      tags.MasterLockedEdge,
+    );
   },
 });
 
