@@ -8,7 +8,7 @@ import {
   graphNodeHasTags,
   graphSize,
   graphSwapNodeTags,
-  nodeHasTag,
+  hasTag,
   tags,
 } from "./graph.js";
 import { rng } from "./rng.js";
@@ -215,16 +215,16 @@ export const arrows = {
 };
 
 export const getArrow = (edge, dir) =>
-  nodeHasTag(edge, tags.MasterLockedEdge)
+  hasTag(edge, tags.MasterLockedEdge)
     ? arrows[dir].masterlocked
-    : nodeHasTag(edge, tags.LockedEdge)
+    : hasTag(edge, tags.LockedEdge)
       ? arrows[dir].locked
-      : nodeHasTag(edge, tags.SecretEdge)
+      : hasTag(edge, tags.SecretEdge)
         ? arrows[dir].secret
-        : nodeHasTag(edge, tags.WindowEdge)
+        : hasTag(edge, tags.WindowEdge)
           ? arrows[dir].window
-          : nodeHasTag(edge, tags.OneWayEdge)
+          : hasTag(edge, tags.OneWayEdge)
             ? arrows[dir].oneWay
-            : nodeHasTag(edge, tags.OneTimeEdge)
+            : hasTag(edge, tags.OneTimeEdge)
               ? arrows[dir].oneTime
               : arrows[dir].default;

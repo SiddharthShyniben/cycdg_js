@@ -40,6 +40,7 @@ export const diagonalDirections = [
   vec(-1, 1),
 ];
 
+export const hasTag = (n, kind) => !!n.tags.find((t) => t.tag == kind);
 export const swapTags = (a, b) => ([a.tags, b.tags] = [b.tags, a.tags]);
 
 export const resetNode = (n) => (
@@ -293,7 +294,6 @@ export const graphNodeHasTags = (g, { x, y }) => g.nodes[x][y].tags.length > 0;
 export const graphNodeCountTags = (g, { x, y }) => g.nodes[x][y].tags.length;
 export const graphNodeHasTag = (g, { x, y }, kind) =>
   !!g.nodes[x][y].tags.find((t) => t.tag == kind);
-export const nodeHasTag = (n, kind) => !!n.tags.find((t) => t.tag == kind);
 
 export const graphEdgeHasTags = (g, c, v) =>
   graphGetEdgeByVector(g, c, v).tags.length > 0;

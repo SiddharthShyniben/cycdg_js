@@ -1,6 +1,6 @@
 import sliceAnsi from "slice-ansi";
 import { fmt } from "./coords.js";
-import { graphSize, nodeHasTag, tags, testSanity } from "./graph.js";
+import { graphSize, hasTag, tags, testSanity } from "./graph.js";
 import { getArrow, range } from "./util.js";
 
 import color from "@nuff-said/color";
@@ -39,8 +39,8 @@ export const drawGraph = (GRA) => {
         text: "",
       };
 
-      const start = nodeHasTag(node, tags.Start);
-      const goal = nodeHasTag(node, tags.Goal);
+      const start = hasTag(node, tags.Start);
+      const goal = hasTag(node, tags.Goal);
 
       const tagsToCheck = [
         tags.Start,
@@ -62,7 +62,7 @@ export const drawGraph = (GRA) => {
 
       const t = [];
       for (const tag of tagsToCheck) {
-        if (nodeHasTag(node, tag)) t.push(tag);
+        if (hasTag(node, tag)) t.push(tag);
       }
       item.text = t.join(", ");
 
