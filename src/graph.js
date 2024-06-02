@@ -389,7 +389,7 @@ export const drawBiconnectedDirectionalRect = (
       .join(", ")}`,
   );
 
-  graphEnableNode(source);
+  graphEnableNode(g, source);
 
   // first pass
   for (let i = sourceIndex; i != sinkIndex; ) {
@@ -397,7 +397,7 @@ export const drawBiconnectedDirectionalRect = (
     const c = allCoords[i];
     const v = sub(allCoords[next], c);
     draw_(`First pass: Linking ${fmt(c)} in ${fmt(v)}`);
-    graphEnableNode(add(c, v));
+    graphEnableNode(g, add(c, v));
     graphEnableDirLinkByVector(g, c, v);
     i = next;
   }
@@ -408,7 +408,7 @@ export const drawBiconnectedDirectionalRect = (
     const c = allCoords[i];
     const v = sub(allCoords[next], c);
     draw_(`Second pass: Linking ${fmt(c)} in ${fmt(v)}`);
-    graphEnableNode(add(c, v));
+    graphEnableNode(g, add(c, v));
     graphEnableDirLinkByVector(g, c, v);
     i = next;
   }

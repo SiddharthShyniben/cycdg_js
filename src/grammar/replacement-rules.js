@@ -5,13 +5,16 @@ import {
   graphAddEdgeTagByCoords,
   graphAddNodeTag,
   graphAddNodeTagPreserveLastId,
+  graphCountEdgesAt,
   graphDisableDirLinksByCoords,
   graphEnableDirLinksByCoords,
   graphEnableNode,
   graphNodeHasTag,
   graphNodeHasTags,
+  graphResetNodeAndConnections,
   graphSize,
   graphSwapEdgeTags,
+  graphSwapNodeTags,
   isGraphEdgeDirectedBetweenCoords,
   tags,
 } from "../graph.js";
@@ -269,7 +272,7 @@ export default [
       (g, { x, y }, a) =>
         g.nodes[x][y].active &&
         adjacent(a, { x, y }) &&
-        isGraphEdgeDirectedBetweenCoords(g, { x, y }, a),
+        isGraphEdgeDirectedBetweenCoords(g, a, { x, y }),
       (g, { x, y }, a) => !g.nodes[x][y].active && adjacent(a, { x, y }),
       (g, { x, y }, _a, b, c) =>
         !g.nodes[x][y].active && adjacent(b, { x, y }) && adjacent(c, { x, y }),
@@ -360,4 +363,37 @@ export default [
   // b   x     b > d
   // V     ==>     V
   // a > c     x   c
+  {
+    name: "l flip",
+    metadata: {},
+    searchNearPrevIndex: [-1, 0, 0, 1],
+    applicabilityFuncs: [
+      (g, { x, y }) =>
+        g.nodes[x][y].active &&
+        graphCountEdgesAt(g, { x, y }) == 2 &&
+        !g.nodes[x][y].flagged,
+      (g, { x, y }, a) =>
+        g.nodes[x][y].active &&
+        adjacent({ x, y }, a) &&
+        isGraphEdgeDirectedBetweenCoords(g, { x, y }, a),
+      (g, { x, y }, a) =>
+        g.nodes[x][y].active &&
+        adjacent({ x, y }, a) &&
+        isGraphEdgeDirectedBetweenCoords(g, a, { x, y }),
+      (g, { x, y }, _, b, c) =>
+        !g.nodes[x][y].active && adjacent({ x, y }, b) && adjacent({ x, y }, c),
+    ],
+    applyToGraph: (g, [a, b, c, d]) => {
+      graphEnableNode(g, d);
+      graphEnableDirLinksByCoords(g, b, d);
+      graphEnableDirLinksByCoords(g, d, c);
+      graphDisableDirLinksByCoords(g, b, a);
+      graphDisableDirLinksByCoords(g, a, c);
+      graphSwapNodeTags(g, a, d);
+      g.nodes[d.x][d.y].flagged = true;
+      copyEdgeTagsPreservingIds(g, b, a, b, d);
+      copyEdgeTagsPreservingIds(g, a, c, d, c);
+      graphResetNodeAndConnections(g, a);
+    },
+  },
 ];
