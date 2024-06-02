@@ -7,6 +7,7 @@ import {
   graphAddNodeTagPreserveLastId,
   graphDisableDirLinksByCoords,
   graphEnableDirLinksByCoords,
+  graphEnableNode,
   graphNodeHasTag,
   graphNodeHasTags,
   graphSize,
@@ -166,7 +167,7 @@ export default [
       (g, { x, y }, prev) => !g.nodes[x][y].active && adjacent(prev, { x, y }),
     ],
     applyToGraph: (g, [a, b]) => {
-      g.nodes[b.x][b.y].active = true;
+      graphEnableNode(g, b);
       graphEnableDirLinksByCoords(g, a, b);
       moveRandomNodeTag(g, a, b);
     },
@@ -200,8 +201,8 @@ export default [
       (g, { x, y }, _, b) => !g.nodes[x][y].active && adjacent({ x, y }, b),
     ],
     applyToGraph: (g, [a, b, c]) => {
-      g.nodes[b.x][b.y].active = true;
-      g.nodes[c.x][c.y].active = true;
+      graphEnableNode(g, b);
+      graphEnableNode(g, c);
       graphEnableDirLinksByCoords(g, b, c);
       moveRandomNodeTag(g, a, c);
       graphAddNodeTag(g, a, tags.Teleport);
@@ -228,7 +229,7 @@ export default [
         !g.nodes[x][y].active && adjacent({ x, y }, a) && adjacent({ x, y }, b),
     ],
     applyToGraph: (g, [a, b, c]) => {
-      g.nodes[c.x][c.y].active = true;
+      graphEnableNode(g, c);
       graphEnableDirLinksByCoords(g, a, c);
       graphEnableDirLinksByCoords(g, c, b);
     },
@@ -274,7 +275,8 @@ export default [
         !g.nodes[x][y].active && adjacent(b, { x, y }) && adjacent(c, { x, y }),
     ],
     applyToGraph: (g, [a, b, c, d]) => {
-      g.nodes[c.x][c.y].active = g.nodes[d.x][d.y].active = true;
+      graphEnableNode(g, c);
+      graphEnableNode(g, d);
       graphEnableDirLinksByCoords(g, a, c);
       graphEnableDirLinksByCoords(g, c, d);
       graphEnableDirLinksByCoords(g, d, b);
@@ -328,7 +330,8 @@ export default [
         !g.nodes[x][y].active && adjacent(b, { x, y }) && adjacent(c, { x, y }),
     ],
     applyToGraph: (g, [a, b, c, d]) => {
-      g.nodes[c.x][c.y].active = g.nodes[d.x][d.y].active = true;
+      graphEnableNode(g, c);
+      graphEnableNode(g, d);
       graphEnableDirLinksByCoords(g, a, c);
       graphEnableDirLinksByCoords(g, c, d);
       graphEnableDirLinksByCoords(g, d, b);

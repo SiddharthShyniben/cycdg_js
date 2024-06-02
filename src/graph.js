@@ -201,6 +201,8 @@ export const graphDisableDirLinksByCoords = (g, from, to) =>
 
 // Nodes /////////////////////////////////////////////////////////////
 
+export const graphEnableNode = (g, { x, y }) => (g.nodes[x][y].active = true);
+
 export const graphResetNodeAndConnections = (g, c) => {
   resetNode(g.nodes[c.x][c.y]); // NOTE: just loop edges from node?
   for (const dir of cardinalDirections) {
@@ -322,21 +324,21 @@ export const drawCardinalConnectedLine = (g, from, to) => {
   const vx = x2 !== x1 ? (x2 - x1) / Math.abs(x2 - x1) : 0;
   const vy = y2 !== y1 ? (y2 - y1) / Math.abs(y2 - y1) : 0;
 
-  g.nodes[x1][y1].active = true;
+  graphEnableNode(g, from);
 
   let x = x1,
     y = y1;
 
   while (vx != 0 && x !== x2) {
     draw_(`Moving in ${fmt(vec(vx, vy))}`);
-    g.nodes[x + vx][y + vy].active = true;
+    graphEnableNode(g, vec(x + vx, y + vy));
     graphEnableDirLinkByVector(g, { x, y }, vec(vx, vy));
     x += vx;
   }
 
   while (vy != 0 && y !== y2) {
     draw_(`Moving in ${fmt(vec(vx, vy))}`);
-    g.nodes[x + vx][y + vy].active = true;
+    graphEnableNode(g, vec(x + vx, y + vy));
     graphEnableDirLinkByVector(g, { x, y }, vec(vx, vy));
     y += vy;
   }
@@ -387,7 +389,7 @@ export const drawBiconnectedDirectionalRect = (
       .join(", ")}`,
   );
 
-  g.nodes[source.x][source.y].active = true;
+  graphEnableNode(source);
 
   // first pass
   for (let i = sourceIndex; i != sinkIndex; ) {
@@ -395,7 +397,7 @@ export const drawBiconnectedDirectionalRect = (
     const c = allCoords[i];
     const v = sub(allCoords[next], c);
     draw_(`First pass: Linking ${fmt(c)} in ${fmt(v)}`);
-    g.nodes[c.x + v.x][c.y + v.y].active = true;
+    graphEnableNode(add(c, v));
     graphEnableDirLinkByVector(g, c, v);
     i = next;
   }
@@ -406,7 +408,7 @@ export const drawBiconnectedDirectionalRect = (
     const c = allCoords[i];
     const v = sub(allCoords[next], c);
     draw_(`Second pass: Linking ${fmt(c)} in ${fmt(v)}`);
-    g.nodes[c.x + v.x][c.y + v.y].active = true;
+    graphEnableNode(add(c, v));
     graphEnableDirLinkByVector(g, c, v);
     i = next;
   }

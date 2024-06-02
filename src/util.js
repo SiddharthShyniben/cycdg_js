@@ -5,6 +5,7 @@ import {
   graphAddEdgeTagByCoords,
   graphAddNodeTag,
   graphEnableDirLinksByCoords,
+  graphEnableNode,
   graphNodeHasTags,
   graphSize,
   graphSwapNodeTags,
@@ -143,7 +144,7 @@ export const pushNodeContensInRandomDirection = (g, c) => {
 
   if (!pushTo || !areAllNodeTagsMovable(g, c)) return;
 
-  g.nodes[pushTo.x][pushTo.y].active = true;
+  graphEnableNode(g, pushTo);
   graphEnableDirLinksByCoords(g, c, pushTo);
   graphSwapNodeTags(g, c, pushTo);
 };
@@ -158,7 +159,7 @@ export const pushNodeContensInRandomDirectionWithEdgeTag = (g, c, tag) => {
 
   if (!pushTo || !areAllNodeTagsMovable(g, c)) return;
 
-  g.nodes[pushTo.x][pushTo.y].active = true;
+  graphEnableNode(g, pushTo);
   graphEnableDirLinksByCoords(g, c, pushTo);
   graphAddEdgeTagByCoords(g, c, pushTo, tag);
   graphSwapNodeTags(g, c, pushTo);
