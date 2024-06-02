@@ -69,6 +69,118 @@ export const edgeHasLinkToVector = (n, a) => getEdgeByVector(n, a).enabled;
 // Graphs ////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
+class Graph {
+  constructor(w, h) {
+    this.width = w;
+    this.height = h;
+    this.nodes = arr2d(w, h).map((row) => row.map(() => node()));
+    this.appliedTags = {};
+
+    for (let x = 0; x < w; x++) {
+      setEdgeLinkByVector(this.nodes[x][h - 1], vec(0, 1), false, false);
+    }
+
+    for (let y = 0; y < h; y++) {
+      setEdgeLinkByVector(this.nodes[w - 1][y], vec(1, 0), false, false);
+    }
+  }
+
+  size() {
+    return [this.w, this.h];
+  }
+
+  area() {
+    return this.w * this.h;
+  }
+
+  get(x, y) {
+    if (x.x && x.y) return get(x.x, x.y);
+    return this.nodes[x]?.[y];
+  }
+
+  inBounds({ x, y }) {
+    return x >= 0 && x < this.width && y >= 0 && y < this.height;
+  }
+
+  inBorder({ x, y }) {
+    return x == 0 || x == this.width - 1 || y == 0 || y == this.height - 1;
+  }
+
+  inCorner({ x, y }) {
+    return (x == 0 || x == this.width - 1) && (y == 0 || y == this.height - 1);
+  }
+
+  edge(f, { x, y }) {
+    const from = { ...f }; // Don't mutate!
+    let vx = x - from.x,
+      vy = y - from.y;
+
+    if (vx * vy !== 0)
+      error(`Diagonal connection: ${fmt(from)} -> ${fmt({ x, y })}`);
+    if (vx == 0 && vy == 0)
+      error(`Zero vector: ${fmt(from)} -> ${fmt({ x, y })}`);
+
+    if (vx == -1) from.x--, (vx = 1);
+    if (vy == -1) from.y--, (vy = 1);
+    return getEdgeByVector(this.nodes[from.x][from.y], vec(vx, vy));
+  }
+
+  edgeVec(a, d) {
+    return this.edge(a, add(a, d));
+  }
+
+  interlinked(a, b) {
+    return a.x < 0 || a.y < 0
+      ? false
+      : b.x < 0 || b.y < 0
+        ? false
+        : this.edge(a, b).enabled;
+  }
+
+  interlinkedVec(a, d) {
+    return this.interlinked(a, add(a, d));
+  }
+
+  edgeCount(a) {
+    let count = 0;
+    for (const dir of cardinalDirections) {
+      const v = add(a, dir);
+      if (!this.inBounds(g, v)) continue;
+      if (this.edge(g, v, a).enabled) count++;
+    }
+    return count;
+  }
+
+  setLinkVec({ x, y }, { x: vx, y: vy }, link) {
+    if (vx * vy !== 0)
+      error(`Diagonal connection: ${fmt({ x, y })} -> ${fmt(vec(vx, vy))}`);
+
+    if (vx == -1) x--, (vx = 1);
+    if (vy == -1) y--, (vy = 1);
+    setEdgeLinkByVector(this.nodes[x][y], vec(vx, vy), link, false);
+  }
+
+  isDirected(from, to) {
+    const n = this.edge(from, to);
+    return n.enabled && n.reversed == (to.x - from.x < 0 || to.y - from.y < 0);
+  }
+
+  countDirectedEdges(node, { countIn, countOut }) {
+    if (!countIn && !countOut) error("Nothing to count");
+
+    let count = 0;
+
+    for (const dir of cardinalDirections) {
+      const other = add(dir, node);
+      if (!this.inBounds(other)) continue;
+      if (countIn && this.isDirected(other, node)) count++;
+      if (countOut && this.isDirected(node, other)) count++;
+    }
+
+    return count;
+  }
+}
+
 // Geometry //////////////////////////////////////////////////////////
 
 export const graphSize = (g) => [g.nodes.length, g.nodes[0].length];
