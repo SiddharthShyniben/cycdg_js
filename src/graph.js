@@ -207,7 +207,7 @@ export const graphResetNodeAndConnections = (g, c) => {
   resetNode(g.nodes[c.x][c.y]); // NOTE: just loop edges from node?
   for (const dir of cardinalDirections) {
     if (coordsInGraphBounds(g, add(c, dir))) {
-      resetEdge(getEdgeByVector(g.nodes[c.x][c.y], dir));
+      resetEdge(graphGetEdgeByVector(g, c, dir));
     }
   }
 };

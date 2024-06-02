@@ -21,6 +21,22 @@ export const makeKeyLockFeature = (a = 0, b = 1) => ({
   },
 });
 
+export const makeOneKeyTwoLockFeature = (a, b, c, d) => ({
+  name: "2xlock",
+  prepareFeature: (g) => {
+    addTagAtRandomActiveNode(g, tags.Key);
+  },
+  applyFeature: (g, coords) => {
+    graphAddEdgeTagByCoords(g, coords[a], coords[b], tags.LockedEdge);
+    graphAddEdgeTagByCoordsPreserveLastId(
+      g,
+      coords[c],
+      coords[d],
+      tags.LockedEdge,
+    );
+  },
+});
+
 export const makeMasterLockFeature = (a = 0, b = 1) => ({
   name: "master lock",
   additionalWeight: -5,

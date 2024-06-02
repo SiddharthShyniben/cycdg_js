@@ -29,6 +29,7 @@ import { graphHasNoFinalizedNodesNear } from "./helper.js";
 import {
   makeKeyLockFeature,
   makeMasterLockFeature,
+  makeOneKeyTwoLockFeature,
   makeOneTimePassageFeature,
   makeOneWayPassageFeature,
   makeSecretPassageFeature,
@@ -37,6 +38,7 @@ import {
   makeWindowPassageFeature,
 } from "./util.js";
 
+// NOTE: some sort of scaffolding system for this?
 export default [
   // a => x
   {
@@ -395,5 +397,153 @@ export default [
       copyEdgeTagsPreservingIds(g, a, c, d, c);
       graphResetNodeAndConnections(g, a);
     },
+  },
+
+  // a   x     a > b
+  //       ==> ^   V
+  // x   x     c < d
+  {
+    name: "corner loop",
+    metadata: { addsCycle: true, enablesNodes: 3 },
+    searchNearPrevIndex: [-1, 0, 0, 1],
+    applicabilityFuncs: [
+      (g, { x, y }) => g.nodes[x][y].active,
+      (g, { x, y }, a) => !g.nodes[x][y].active && adjacent({ x, y }, a),
+      (g, { x, y }, a) => !g.nodes[x][y].active && adjacent({ x, y }, a),
+      (g, { x, y }, _a, b, c) =>
+        !g.nodes[x][y].active && adjacent({ x, y }, b) && adjacent({ x, y }, c),
+    ],
+    applyToGraph: (g, [a, b, c, d]) => {
+      graphEnableNode(g, b);
+      graphEnableNode(g, c);
+      graphEnableNode(g, d);
+      graphEnableDirLinksByCoords(g, a, b);
+      graphEnableDirLinksByCoords(g, b, d);
+      graphEnableDirLinksByCoords(g, d, c);
+      graphEnableDirLinksByCoords(g, c, a);
+    },
+    optionalFeatures: [
+      makeOneWayPassageFeature(0, 1, 2, 0),
+      makeTwoMasterLockFeature(0, 1, 2, 0),
+      makeMasterLockFeature(0, 1),
+      {
+        name: "secret or hazard",
+        applyFeature: (g, [a, _, c, d]) => {
+          graphAddNodeTag(g, d, tags.Boss);
+          graphAddNodeTag(g, c, tags.Treasure);
+          graphAddEdgeTagByCoords(g, c, a, tags.SecretEdge);
+        },
+      },
+      {
+        name: "forced boss",
+        applyFeature: (g, [a, b, c, d]) => {
+          graphAddNodeTag(g, d, tags.Boss);
+          graphAddEdgeTagByCoords(g, a, b, tags.OneTimeEdge);
+          graphAddEdgeTagByCoords(g, c, a, tags.OneTimeEdge);
+        },
+      },
+    ],
+  },
+
+  // a > b > c       a > b > c
+  //            ==>  V       ^
+  // x   x   x       d > e > f
+  {
+    name: "alternate way",
+    metadata: { addsCycle: true, enablesNodes: 3 },
+    searchNearPrevIndex: [-1, 0, 1, 0, 3, 2],
+    applicabilityFuncs: [
+      (g, { x, y }) => g.nodes[x][y].active,
+      (g, { x, y }, a) =>
+        g.nodes[x][y].active &&
+        adjacent({ x, y }, a) &&
+        isGraphEdgeDirectedBetweenCoords(g, a, { x, y }),
+      (g, { x, y }, _a, b) =>
+        g.nodes[x][y].active &&
+        adjacent({ x, y }, b) &&
+        isGraphEdgeDirectedBetweenCoords(g, b, { x, y }),
+      (g, { x, y }, a) => !g.nodes[x][y].active && adjacent({ x, y }, a),
+      (g, { x, y }, _a, _b, _c, d) =>
+        !g.nodes[x][y].active && adjacent({ x, y }, d),
+      (g, { x, y }, _a, _b, c, _d, e) =>
+        !g.nodes[x][y].active && adjacent({ x, y }, e) && adjacent({ x, y }, c),
+    ],
+    applyToGraph: (g, [a, b, c, d, e, f]) => {
+      graphEnableNode(g, d);
+      graphEnableNode(g, e);
+      graphEnableNode(g, f);
+      graphEnableDirLinksByCoords(g, a, d);
+      graphEnableDirLinksByCoords(g, d, e);
+      graphEnableDirLinksByCoords(g, e, f);
+      graphEnableDirLinksByCoords(g, f, c);
+      if (!graphNodeHasTags(g, b)) graphAddNodeTag(g, b, randomHazard());
+    },
+    mandatoryFeatures: [
+      null,
+      makeSecretPassageFeature(0, 3),
+      makeMasterLockFeature(0, 3),
+      makeOneKeyTwoLockFeature(0, 3, 5, 2),
+      makeOneWayPassageFeature(0, 3, 5, 2),
+      makeTwoMasterLockFeature(0, 3, 5, 2),
+    ],
+    optionalFeatures: [
+      {
+        name: "hazard",
+        applyFeature: (g, [_a, _b, _c, _d, e]) =>
+          graphAddNodeTag(g, e, randomHazard()),
+      },
+    ],
+  },
+
+  // x   x   x     c > d > e
+  //           =>  ^       V
+  // a > b   x     a > b < f
+  {
+    name: "adjacent cycle 4",
+    metadata: { addsCycle: true, enablesNodes: 4 },
+    searchNearPrevIndex: [-1, 0, 0, 2, 3, 1],
+    applicabilityFuncs: [
+      (g, { x, y }) => g.nodes[x][y].active,
+      (g, { x, y }, a) =>
+        g.nodes[x][y].active &&
+        adjacent({ x, y }, a) &&
+        isGraphEdgeDirectedBetweenCoords(g, a, { x, y }),
+      (g, { x, y }, a) => !g.nodes[x][y].active && adjacent(a, { x, y }),
+      (g, { x, y }, _a, _b, c) =>
+        !g.nodes[x][y].active && adjacent(c, { x, y }),
+      (g, { x, y }, _a, _b, _c, d) =>
+        !g.nodes[x][y].active && adjacent(d, { x, y }),
+      (g, { x, y }, _a, b, _c, _d, e) =>
+        !g.nodes[x][y].active && adjacent(e, { x, y }) && adjacent(b, { x, y }),
+    ],
+    applyToGraph: (g, [a, b, c, d, e, f]) => {
+      graphEnableNode(g, c);
+      graphEnableNode(g, d);
+      graphEnableNode(g, e);
+      graphEnableNode(g, f);
+      graphEnableDirLinksByCoords(g, a, c);
+      graphEnableDirLinksByCoords(g, c, d);
+      graphEnableDirLinksByCoords(g, d, e);
+      graphEnableDirLinksByCoords(g, e, f);
+      graphEnableDirLinksByCoords(g, f, b);
+    },
+    mandatoryFeatures: [
+      {
+        name: "copy ab <> ac",
+        applyFeature: (g, [a, b, c]) => {
+          copyEdgeTagsPreservingIds(g, a, b, a, c);
+        },
+      },
+      makeSecretPassageFeature(0, 2),
+      makeMasterLockFeature(0, 2),
+      makeOneWayPassageFeature(0, 2, 5, 1),
+      makeTwoMasterLockFeature(0, 2, 5, 1),
+    ],
+    optionalFeatures: [
+      {
+        name: "hazard",
+        applyFeature: (g, [_a, _b, c]) => graphAddNodeTag(g, c, randomHazard()),
+      },
+    ],
   },
 ];
