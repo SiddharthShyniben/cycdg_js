@@ -4,11 +4,11 @@ import { range } from "./util.js";
 
 import color from "@nuff-said/color";
 import { stripAnsi } from "unbug/src/util.js";
-import { rng } from "./rng.js";
 
-export const drawGraph = ({ graph, appliedRules }) => {
+export const drawGraph = (GRA) => {
+  const { graph, appliedRules } = GRA;
   console.clear();
-  console.log(rng.seed);
+  console.log(GRA.stringifyGenerationMetadata());
   const sanity = testSanity(graph);
   if (!sanity.sane) {
     console.log();
@@ -158,7 +158,10 @@ export const drawGraph = ({ graph, appliedRules }) => {
   }
 
   console.log();
-  for (const rule of appliedRules) {
+  const space = process.stdout.rows - (GRA.height * 6 + 3);
+  for (const rule of appliedRules.length > space
+    ? appliedRules.slice(appliedRules.length - space)
+    : appliedRules) {
     const mandatoryText = rule.mandatoryFeature
       ? color.blue(` ${rule.mandatoryFeature}`)
       : "";

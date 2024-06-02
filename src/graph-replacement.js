@@ -1,5 +1,9 @@
+import unbug from "unbug";
+import logUpdate from "log-update";
+import color from "@nuff-said/color";
+
 import { graph, graphGetEnabledNodesCount, testSanity } from "./graph.js";
-import { clamp } from "./util.js";
+import { clamp, error } from "./util.js";
 
 import allInitalRules from "./grammar/initial-rules.js";
 import {
@@ -9,10 +13,8 @@ import {
   tryFindAllApplicableCoordVariantsRecursively,
 } from "./grammar/helper.js";
 import { rng } from "./rng.js";
-import unbug from "unbug";
 import { fmt } from "./coords.js";
 import replacementRules from "./grammar/replacement-rules.js";
-import logUpdate from "log-update";
 
 const debug = unbug("applier");
 
@@ -65,6 +67,33 @@ export class GraphReplacementApplier {
         0;
 
     this.applyRandomInitialRule();
+  }
+
+  filledEnough() {
+    if (this.desiredFillPercentage == 0)
+      error("desired fill percentage is zero");
+    const size = this.width * this.height;
+    const currentPercentage = (100 * this.enabledNodesCount + size / 2) / size;
+    const currentPlusOne =
+      (100 * (this.enabledNodesCount + 1) + size / 2) / size;
+    return (
+      currentPercentage == this.desiredFillPercentage ||
+      currentPlusOne > this.desiredFillPercentage
+    );
+  }
+
+  stringifyGenerationMetadata() {
+    const enabledNodesCount = graphGetEnabledNodesCount(this.graph);
+    const size = this.width * this.height;
+    const enabledPercentage = (100 * enabledNodesCount + size / 2) / size;
+    return [
+      `Seed: ${rng.seed}`,
+      `Rules: ${this.appliedRulesCount}`,
+      `Cycles: ${this.cyclesCount}`,
+      `Disabled: ${this.finalizedDisabledNodesCount}`,
+      `Filled: ${enabledPercentage}/${this.desiredFillPercentage}%`,
+      `Free non-adjacent: ${countEmptyEditableNodesNearEnabledOnes(this.graph)}`,
+    ].join(color.dim(" / "));
   }
 
   applyRandomInitialRule() {
