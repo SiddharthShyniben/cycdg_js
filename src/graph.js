@@ -73,18 +73,11 @@ export const edgeHasLinkToVector = (n, a) => getEdgeByVector(n, a).enabled;
 export class Graph {
   constructor(w, h) {
     debug(`Creating graph of dimensions ${fmt(vec(w, h))}`);
+
     this.width = w;
     this.height = h;
     this.nodes = arr2d(w, h).map((row) => row.map(() => node()));
     this.appliedTags = {};
-
-    for (let x = 0; x < w; x++) {
-      setEdgeLinkByVector(this.nodes[x][h - 1], vec(0, 1), false, false);
-    }
-
-    for (let y = 0; y < h; y++) {
-      setEdgeLinkByVector(this.nodes[w - 1][y], vec(1, 0), false, false);
-    }
   }
 
   size() {
@@ -215,7 +208,6 @@ export class Graph {
   }
 
   enable(c) {
-    debug(`Enabling ${fmt(c)}`);
     this.get(c).active = true;
   }
 
@@ -283,46 +275,6 @@ export class Graph {
 
   copyEdgeTagsPreservingIds(f1, f2, t1, t2) {
     this.edge(f1, f2).tags.push(...this.edge(t1, t2).tags);
-  }
-
-  drawCardinalConnectedLine(from, to) {
-    draw_(`Drawing cardinal line from ${fmt(from)} to ${fmt(to)}`);
-
-    const [x1, y1] = spread(from);
-    const [x2, y2] = spread(to);
-
-    const vx = x2 !== x1 ? (x2 - x1) / Math.abs(x2 - x1) : 0;
-    const vy = y2 !== y1 ? (y2 - y1) / Math.abs(y2 - y1) : 0;
-
-    this.enable(from);
-
-    let x = x1,
-      y = y1;
-
-    while (vx != 0 && x !== x2) {
-      draw_(`Moving in ${fmt(vec(vx, vy))}`);
-      this.enable(vec(x + vx, y + vy));
-      this.enableLinkVec({ x, y }, vec(vx, vy));
-      x += vx;
-    }
-
-    while (vy != 0 && y !== y2) {
-      draw_(`Moving in ${fmt(vec(vx, vy))}`);
-      this.enable(vec(x + vx, y + vy));
-      this.enableLinkVec({ x, y }, vec(vx, vy));
-      y += vy;
-    }
-  }
-
-  drawConnectedDirectionalRect({ x, y }, { x: w, y: h }, ccw = false) {
-    const rghX = x + w - 1;
-    const botY = y + h - 1;
-
-    const corners = [{ x, y }, vec(rghX, y), vec(rghX, botY), vec(x, botY)];
-    if (ccw) corners.reverse();
-
-    for (let i = 0; i < 4; i++)
-      this.drawCardinalConnectedLine(corners[i], corners[i + 1] || corners[0]);
   }
 
   // Draws two paths from source to sink alongside the rect.
