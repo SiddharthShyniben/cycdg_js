@@ -178,21 +178,6 @@ export class Graph {
     return n.enabled && n.reversed == (to.x - from.x < 0 || to.y - from.y < 0);
   }
 
-  countDirectedEdges(node, { countIn, countOut }) {
-    if (!countIn && !countOut) error("Nothing to count");
-
-    let count = 0;
-
-    for (const dir of cardinalDirections) {
-      const other = add(dir, node);
-      if (!this.inBounds(other)) continue;
-      if (countIn && this.isDirected(other, node)) count++;
-      if (countOut && this.isDirected(node, other)) count++;
-    }
-
-    return count;
-  }
-
   incomingLinksOnlyAt(coords) {
     for (const dir of cardinalDirections) {
       if (
