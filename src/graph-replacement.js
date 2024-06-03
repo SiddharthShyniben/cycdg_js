@@ -2,7 +2,7 @@ import unbug from "unbug";
 import logUpdate from "log-update";
 import color from "@nuff-said/color";
 
-import { graph, graphGetEnabledNodesCount, testSanity } from "./graph.js";
+import { Graph } from "./graph.js";
 import { clamp, error } from "./util.js";
 
 import allInitalRules from "./grammar/initial-rules.js";
@@ -36,7 +36,7 @@ export class GraphReplacementApplier {
     this.width = clamp(width, 4, 25);
     this.height = clamp(height, 5, 25);
 
-    this.graph = graph(this.width, this.height);
+    this.graph = new Graph(this.width, this.height);
 
     this.minCycles = clamp(minCycles || 3, 1, 100);
     this.maxCycles = clamp(maxCycles || 8, 1, 100);
@@ -83,7 +83,7 @@ export class GraphReplacementApplier {
   }
 
   stringifyGenerationMetadata() {
-    const enabledNodesCount = graphGetEnabledNodesCount(this.graph);
+    const enabledNodesCount = this.graph.countEnabled();
     const size = this.width * this.height;
     const enabledPercentage = (100 * enabledNodesCount + size / 2) / size;
     return [
@@ -101,7 +101,7 @@ export class GraphReplacementApplier {
     const rule = allInitalRules[rng.randInRange(allInitalRules.length)];
     if (isRuleApplicableForGraph(rule, this.graph)) this.applyInitialRule(rule);
     else console.error("Rule failed!", rule.name);
-    this.enabledNodesCount = graphGetEnabledNodesCount(this.graph);
+    this.enabledNodesCount = this.graph.countEnabled();
   }
 
   applyRandomReplacementRule() {
@@ -184,7 +184,7 @@ export class GraphReplacementApplier {
       c,
     );
 
-    const { sane, problems } = testSanity(this.graph);
+    const { sane, problems } = this.graph.testSanity();
     if (!sane) {
       console.log();
       console.log(
@@ -288,8 +288,7 @@ export class GraphReplacementApplier {
     if (addsCycle) this.cyclesCount++;
     if (addsTeleport) this.teleportsCount++;
     if (optionalFeature) this.appliedFeaturesCount++;
-    if (enablesNodesUnkown)
-      this.enabledNodesCount = graphGetEnabledNodesCount(this.graph);
+    if (enablesNodesUnkown) this.enabledNodesCount = this.graph.countEnabled();
     else this.enabledNodesCount += enablesNodes || 0;
 
     this.finalizedDisabledNodesCount += finalizesDisabledNodes || 0;

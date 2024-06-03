@@ -1,14 +1,5 @@
 import { add, adjacent, fmt, is, manhattan, vec } from "../coords.js";
-import {
-  coordsInGraphBounds,
-  drawBiconnectedDirectionalRect,
-  graphAddEdgeTagByCoords,
-  graphAddNodeTag,
-  graphAddNodeTagPreserveLastId,
-  graphNodeHasTag,
-  graphSize,
-  tags,
-} from "../graph.js";
+import { tags } from "../graph.js";
 import { rng } from "../rng.js";
 import {
   areCoordsInRectCorner,
@@ -28,11 +19,11 @@ export default [
   {
     name: "non-adjacent cycle",
     addsCycle: true,
-    isApplicableAt: (g, c) => coordsInGraphBounds(g, add(c, 2)),
+    isApplicableAt: (g, c) => g.inBounds(add(c, 3)),
     applyOnGraphAt: (g, { x, y }) => {
       debug(`applying non-adjacent cycle at ${fmt({ x, y })}`);
 
-      const [w, h] = graphSize(g);
+      const [w, h] = g.size();
       const rw = rng.randInRange(3, w - x),
         rh = rng.randInRange(3, h - y);
 
@@ -53,10 +44,10 @@ export default [
       debug(`start: ${fmt(start)}`);
       debug(`goal: ${fmt(goal)}`);
 
-      drawBiconnectedDirectionalRect(g, { x, y }, vec(rw, rh), start, goal);
+      g.drawBiconnectedDirectionalRect({ x, y }, vec(rw, rh), start, goal);
 
-      graphAddNodeTag(g, start, tags.Start);
-      graphAddNodeTag(g, goal, tags.Goal);
+      g.addNodeTag(start, tags.Start);
+      g.addNodeTag(goal, tags.Goal);
     },
     mandatoryFeatures: [
       {
@@ -65,7 +56,7 @@ export default [
           feat("applying alt paths with hazards");
 
           const goal = getRandomGraphCoordsByFunc(g, (c) =>
-            graphNodeHasTag(g, c, tags.Goal),
+            g.hasTag(c, tags.Goal),
           );
           feat(`goal: ${fmt(goal)}`);
 
@@ -83,8 +74,8 @@ export default [
 
           feat(`adding random hazard to ${fmt(c1)} and ${fmt(c2)}`);
 
-          graphAddNodeTag(g, c1, randomHazard());
-          graphAddNodeTag(g, c2, randomHazard());
+          g.addNodeTag(c1, randomHazard());
+          g.addNodeTag(c2, randomHazard());
 
           if (rng.randInRange(0, 3) == 0) {
             feat("pushing goal in random direction");
@@ -97,10 +88,10 @@ export default [
         applyFeature: (g) => {
           feat("applying two keys");
           const start = getRandomGraphCoordsByFunc(g, (c) =>
-            graphNodeHasTag(g, c, tags.Start),
+            g.hasTag(c, tags.Start),
           );
           const goal = getRandomGraphCoordsByFunc(g, (c) =>
-            graphNodeHasTag(g, c, tags.Goal),
+            g.hasTag(c, tags.Goal),
           );
           feat(`start: ${fmt(start)}`);
           feat(`goal: ${fmt(goal)}`);
@@ -122,8 +113,8 @@ export default [
           feat(`key 1: ${fmt(c1)}`);
           feat(`key 2: ${fmt(c2)}`);
 
-          graphAddNodeTag(g, c1, tags.HalfKey);
-          graphAddNodeTagPreserveLastId(g, c2, tags.HalfKey);
+          g.addNodeTag(c1, tags.HalfKey);
+          g.addNodeTagPreserveId(c2, tags.HalfKey);
 
           feat("pushing goal in random direction with BilockedEdge tag");
           pushNodeContensInRandomDirectionWithEdgeTag(
@@ -138,10 +129,10 @@ export default [
   {
     name: "adjacent cycle",
     addsCycle: true,
-    isApplicableAt: (g, c) => coordsInGraphBounds(g, add(c, 2)),
+    isApplicableAt: (g, c) => g.inBounds(add(c, 3)),
     applyOnGraphAt: (g, { x, y }) => {
       debug("applying adjacent cycle");
-      const [w, h] = graphSize(g);
+      const [w, h] = g.size();
       const rw = rng.randInRange(3, w - x),
         rh = rng.randInRange(3, h - y);
 
@@ -160,9 +151,9 @@ export default [
 
       debug(`goal: ${fmt(goal)}`);
 
-      drawBiconnectedDirectionalRect(g, { x, y }, vec(rw, rh), start, goal);
-      graphAddNodeTag(g, start, tags.Start);
-      graphAddNodeTag(g, goal, tags.Goal);
+      g.drawBiconnectedDirectionalRect({ x, y }, vec(rw, rh), start, goal);
+      g.addNodeTag(start, tags.Start);
+      g.addNodeTag(goal, tags.Goal);
     },
     mandatoryFeatures: [
       {
@@ -170,16 +161,16 @@ export default [
         applyFeature: (g) => {
           feat("applying foresee");
           const start = getRandomGraphCoordsByFunc(g, (c) =>
-            graphNodeHasTag(g, c, tags.Start),
+            g.hasTag(c, tags.Start),
           );
           const goal = getRandomGraphCoordsByFunc(g, (c) =>
-            graphNodeHasTag(g, c, tags.Goal),
+            g.hasTag(c, tags.Goal),
           );
 
           feat(`start: ${fmt(start)}`);
           feat(`goal: ${fmt(goal)}`);
 
-          graphAddEdgeTagByCoords(g, start, goal, tags.WindowEdge);
+          g.addEdgeTag(start, goal, tags.WindowEdge);
         },
       },
       {
@@ -187,10 +178,10 @@ export default [
         applyFeature: (g) => {
           feat("applying openable shortcut");
           const start = getRandomGraphCoordsByFunc(g, (c) =>
-            graphNodeHasTag(g, c, tags.Start),
+            g.hasTag(c, tags.Start),
           );
           const goal = getRandomGraphCoordsByFunc(g, (c) =>
-            graphNodeHasTag(g, c, tags.Goal),
+            g.hasTag(c, tags.Goal),
           );
 
           feat(`start: ${fmt(start)}`);
@@ -204,8 +195,8 @@ export default [
 
           feat(`key: ${fmt(c1)}`);
 
-          graphAddNodeTag(g, c1, tags.Key);
-          graphAddEdgeTagByCoords(g, start, goal, tags.LockedEdge);
+          g.addNodeTag(c1, tags.Key);
+          g.addEdgeTag(start, goal, tags.LockedEdge);
         },
       },
     ],

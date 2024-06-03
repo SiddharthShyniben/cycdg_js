@@ -1,17 +1,7 @@
 import unbug from "unbug";
 import color from "@nuff-said/color";
 import { adjacent, fmt, vec } from "./coords.js";
-import {
-  graphAddEdgeTagByCoords,
-  graphAddNodeTag,
-  graphEnableDirLinksByCoords,
-  graphEnableNode,
-  graphNodeHasTags,
-  graphSize,
-  graphSwapNodeTags,
-  hasTag,
-  tags,
-} from "./graph.js";
+import { hasTag, tags } from "./graph.js";
 import { rng } from "./rng.js";
 
 const debug = unbug("util");
@@ -77,10 +67,10 @@ export const areCoordsAdjacentToRectCorner = (
 
 export const getRandomGraphCoordsByFunc = (graph, fn) => {
   const candidates = [];
-  const [w, h] = graphSize(graph);
-  for (let x in range(w)) {
-    for (let y in range(h)) {
-      (x = +x), (y = +y);
+  const [w, h] = graph.size();
+  debug("Size", typeof w, typeof h);
+  for (let x of range(w)) {
+    for (let y of range(h)) {
       if (fn({ x, y })) candidates.push({ x, y });
     }
   }
@@ -91,7 +81,7 @@ export const getRandomGraphCoordsByFunc = (graph, fn) => {
 export const getRandomGraphCoordsByScore = (graph, fn) => {
   const candidates = [],
     scores = [];
-  const [w, h] = graphSize(graph);
+  const [w, h] = graph.size();
 
   for (const x in range(w)) {
     for (const y in range(h)) {
@@ -144,9 +134,9 @@ export const pushNodeContensInRandomDirection = (g, c) => {
 
   if (!pushTo || !areAllNodeTagsMovable(g, c)) return;
 
-  graphEnableNode(g, pushTo);
-  graphEnableDirLinksByCoords(g, c, pushTo);
-  graphSwapNodeTags(g, c, pushTo);
+  g.enable(pushTo);
+  g.enableLink(c, pushTo);
+  g.swapTags(c, pushTo);
 };
 
 export const pushNodeContensInRandomDirectionWithEdgeTag = (g, c, tag) => {
@@ -159,17 +149,16 @@ export const pushNodeContensInRandomDirectionWithEdgeTag = (g, c, tag) => {
 
   if (!pushTo || !areAllNodeTagsMovable(g, c)) return;
 
-  graphEnableNode(g, pushTo);
-  graphEnableDirLinksByCoords(g, c, pushTo);
-  graphAddEdgeTagByCoords(g, c, pushTo, tag);
-  graphSwapNodeTags(g, c, pushTo);
+  g.enable(pushTo);
+  g.enableLink(c, pushTo);
+  g.addEdgeTag(c, pushTo, tag);
+  g.swapTags(c, pushTo);
 };
 
 export const addTagAtRandomActiveNode = (graph, tag) =>
-  graphAddNodeTag(
-    graph,
-    getRandomGraphCoordsByScore(graph, ({ x, y }) =>
-      !graph.nodes[x][y].active ? 0 : graphNodeHasTags(graph, { x, y }) ? 1 : 5,
+  graph.addNodeTag(
+    getRandomGraphCoordsByScore(graph, (c) =>
+      !graph.active(c) ? 0 : graph.hasTags(c) ? 1 : 5,
     ),
     tag,
   );

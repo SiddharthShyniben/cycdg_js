@@ -1,6 +1,6 @@
 import sliceAnsi from "slice-ansi";
 import { fmt } from "./coords.js";
-import { graphSize, hasTag, tags, testSanity } from "./graph.js";
+import { hasTag, tags } from "./graph.js";
 import { getArrow, range } from "./util.js";
 
 import color from "@nuff-said/color";
@@ -10,7 +10,8 @@ export const drawGraph = (GRA) => {
   const { graph, appliedRules } = GRA;
   console.clear();
   console.log(GRA.stringifyGenerationMetadata());
-  const sanity = testSanity(graph);
+  const sanity = graph.testSanity();
+
   if (!sanity.sane) {
     console.log();
     console.log(
@@ -24,7 +25,8 @@ export const drawGraph = (GRA) => {
     );
     console.log();
   }
-  const [w, h] = graphSize(graph);
+
+  const [w, h] = graph.size();
 
   for (const y of range(h)) {
     let cells = [];

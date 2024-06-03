@@ -1,4 +1,4 @@
-import { cardinalDirections, diagonalDirections, graphSize } from "../graph.js";
+import { cardinalDirections, diagonalDirections } from "../graph.js";
 import { error, range } from "../util.js";
 import { fmt, is, spread, vec } from "../coords.js";
 import { rng } from "../rng.js";
@@ -7,7 +7,7 @@ import unbug from "unbug";
 const debug = unbug("helper");
 
 export const isRuleApplicableForGraph = (rule, graph) => {
-  const [w, h] = graphSize(graph);
+  const [w, h] = graph.size();
 
   for (const x of range(w)) {
     for (const y of range(h)) {
@@ -19,7 +19,7 @@ export const isRuleApplicableForGraph = (rule, graph) => {
 };
 
 export const getCandidateCellForRule = (rule, graph) => {
-  const [w, h] = graphSize(graph);
+  const [w, h] = graph.size();
   const candidates = [];
 
   for (const x of range(w)) {
@@ -43,7 +43,7 @@ export const tryFindAllApplicableCoordVariantsRecursively = (
     args,
   );
   const index = args.length;
-  const [w, h] = graphSize(graph);
+  const [w, h] = graph.size();
 
   debug(prefix + `graph size: ${fmt(vec(w, h))}`);
 
@@ -105,7 +105,7 @@ export const tryFindAllApplicableCoordVariantsRecursively = (
 };
 
 export const getRandomApplicableCoordsForRule = (rule, graph) => {
-  const [w, h] = graphSize(graph);
+  const [w, h] = graph.size();
   const candidates = [];
 
   for (const x of range(w)) {
@@ -128,7 +128,7 @@ export const graphHasNoFinalizedNodesNear = (g, { x, y }) => {
 
 export const countEmptyEditableNodesNearEnabledOnes = (g) => {
   let count = 0;
-  const [w, h] = graphSize(g);
+  const [w, h] = g.size();
 
   for (let x = 0; x < w; x++) {
     for (let y = 0; y < h; y++) {
