@@ -98,6 +98,11 @@ export class Graph {
     return this.get(c).active;
   }
 
+  finalize(c) {
+    this.get(c).finalized = true;
+    return this;
+  }
+
   inBounds({ x, y }) {
     return x >= 0 && x < this.width && y >= 0 && y < this.height;
   }
@@ -150,22 +155,27 @@ export class Graph {
     if (vx == -1) x--, (vx = 1);
     if (vy == -1) y--, (vy = 1);
     setEdgeLinkByVector(this.nodes[x][y], vec(vx, vy), link, false);
+    return this;
   }
 
   enableLinkVec(from, vec) {
     this.setLinkVec(from, vec, true);
+    return this;
   }
 
   disableLinkVec(from, vec) {
     this.setLinkVec(from, vec, false);
+    return this;
   }
 
   enableLink(from, to) {
     this.enableLinkVec(from, vectorTo(from, to));
+    return this;
   }
 
   disableLink(from, to) {
     this.disableLinkVec(from, vectorTo(from, to));
+    return this;
   }
 
   isDirected(from, to) {
@@ -173,27 +183,9 @@ export class Graph {
     return n.enabled && n.reversed == (to.x - from.x < 0 || to.y - from.y < 0);
   }
 
-  isDirectedVec(from, to) {
-    const n = this.edgeVec(from, to);
-    return n.enabled && n.reversed == (to.x - from.x < 0 || to.y - from.y < 0);
-  }
-
-  incomingLinksOnlyAt(coords) {
-    for (const dir of cardinalDirections) {
-      if (
-        this.inBounds(add(coords, dir)) &&
-        this.interlinkedVec(coords, dir) &&
-        this.isDirectedVec(coords, dir)
-      ) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  enable(c) {
-    this.get(c).active = true;
+  enable(...c) {
+    for (const x of c) this.get(x).active = true;
+    return this;
   }
 
   reset(c) {
@@ -203,6 +195,7 @@ export class Graph {
         resetEdge(this.edgeVec(c, dir));
       }
     }
+    return this;
   }
 
   countEnabled() {
@@ -216,38 +209,45 @@ export class Graph {
     const id = this.appliedTags[kind] || 0;
     this.appliedTags[kind] = id + 1;
     this.get(c).tags.push(tag(kind, id));
+    return this;
   }
 
   addNodeTagPreserveId(c, kind) {
     this.appliedTags[kind] ??= 0;
     this.appliedTags[kind]--;
     this.addNodeTag(c, kind);
+    return this;
   }
 
   addEdgeTag(from, to, kind) {
     const id = this.appliedTags[kind] || 0;
     this.appliedTags[kind] = id + 1;
     this.edge(from, to).tags.push(tag(kind, id));
+    return this;
   }
 
   addEdgeTagVec(from, to, kind) {
     const id = this.appliedTags[kind] || 0;
     this.appliedTags[kind] = id + 1;
     this.edgeVec(from, to).tags.push(tag(kind, id));
+    return this;
   }
 
   addEdgeTagPreserveId(from, to, kind) {
     this.appliedTags[kind] ??= 0;
     this.appliedTags[kind]--;
     this.addEdgeTag(from, to, kind);
+    return this;
   }
 
   swapTags(a, b) {
     swapTags(this.get(a), this.get(b));
+    return this;
   }
 
   swapEdgeTags(f1, f2, t1, t2) {
     swapTags(this.edge(f1, f2), this.edge(t1, t2));
+    return this;
   }
 
   hasTags(a) {
@@ -260,6 +260,7 @@ export class Graph {
 
   copyEdgeTagsPreservingIds(f1, f2, t1, t2) {
     this.edge(f1, f2).tags.push(...this.edge(t1, t2).tags);
+    return this;
   }
 
   // Draws two paths from source to sink alongside the rect.
@@ -293,8 +294,7 @@ export class Graph {
       const c = allCoords[i];
       const v = sub(allCoords[next], c);
       draw_(`First pass: Linking ${fmt(c)} in ${fmt(v)}`);
-      this.enable(add(c, v));
-      this.enableLinkVec(c, v);
+      this.enable(add(c, v)).enableLinkVec(c, v);
       i = next;
     }
 
@@ -304,10 +304,11 @@ export class Graph {
       const c = allCoords[i];
       const v = sub(allCoords[next], c);
       draw_(`Second pass: Linking ${fmt(c)} in ${fmt(v)}`);
-      this.enable(add(c, v));
-      this.enableLinkVec(c, v);
+      this.enable(add(c, v)).enableLinkVec(c, v);
       i = next;
     }
+
+    return this;
   }
 
   testSanity() {
@@ -316,7 +317,7 @@ export class Graph {
 
     for (let x = 0; x < this.nodes.length; x++) {
       for (let y = 0; y < this.nodes[0].length; y++) {
-        const node = this.nodes[x][y];
+        const node = this.get(x, y);
         if (!node.active) {
           if (node.tags.length > 0) {
             sane = false;

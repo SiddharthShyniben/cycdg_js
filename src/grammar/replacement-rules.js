@@ -28,10 +28,9 @@ export default [
     metadata: { finalizesDisabledNodes: 1 },
     searchNearPrevIndex: [-1],
     applicabilityFuncs: [
-      (g, { x, y }) =>
-        !g.nodes[x][y].active && graphHasNoFinalizedNodesNear(g, { x, y }),
+      (g, c) => !g.active(c) && graphHasNoFinalizedNodesNear(g, c),
     ],
-    applyToGraph: (g, { x, y }) => (g.nodes[x][y].finalized = true),
+    applyToGraph: (g, c) => g.finalize(c),
   },
 
   // a b => x x
@@ -44,15 +43,11 @@ export default [
     },
     searchNearPrevIndex: [-1, 0],
     applicabilityFuncs: [
-      (g, { x, y }) =>
-        !g.nodes[x][y].active && graphHasNoFinalizedNodesNear(g, { x, y }),
-      (g, { x, y }, prev) =>
-        !g.nodes[x][y].active &&
-        adjacent(prev, { x, y }) &&
-        graphHasNoFinalizedNodesNear(g, { x, y }),
+      (g, c) => !g.active(c) && graphHasNoFinalizedNodesNear(g, c),
+      (g, c, a) =>
+        !g.active(c) && adjacent(a, c) && graphHasNoFinalizedNodesNear(g, c),
     ],
-    applyToGraph: (g, nodes) =>
-      nodes.slice(0, 2).map(({ x, y }) => (g.nodes[x][y].finalized = true)),
+    applyToGraph: (g, nodes) => nodes.slice(0, 2).map((c) => g.finalize(c)),
   },
 
   // a b c => x x x
@@ -65,18 +60,15 @@ export default [
     },
     searchNearPrevIndex: [-1, 0, 1],
     applicabilityFuncs: [
-      (g, { x, y }) =>
-        !g.nodes[x][y].active && graphHasNoFinalizedNodesNear(g, { x, y }),
-      (g, { x, y }, prev) =>
-        !g.nodes[x][y].active &&
-        adjacent(prev, { x, y }) &&
-        graphHasNoFinalizedNodesNear(g, { x, y }),
-      (g, { x, y }, p, q) => {
+      (g, c) => !g.active(c) && graphHasNoFinalizedNodesNear(g, c),
+      (g, c, a) =>
+        !g.active(c) && adjacent(a, c) && graphHasNoFinalizedNodesNear(g, c),
+      (g, c, p, q) => {
         const [w, h] = g.size();
 
         // Prevent L shape closing away the corner of the map
         if (
-          areCoordsAdjacentToRectCorner({ x, y }, vec(0), vec(w, h)) &&
+          areCoordsAdjacentToRectCorner(c, vec(0), vec(w, h)) &&
           areCoordsAdjacentToRectCorner(p, vec(0), vec(w, h)) &&
           !areCoordsOnRect(q, vec(0), vec(w, h))
         ) {
@@ -84,14 +76,11 @@ export default [
         }
 
         return (
-          !g.nodes[x][y].active &&
-          adjacent(q, { x, y }) &&
-          graphHasNoFinalizedNodesNear(g, { x, y })
+          !g.active(c) && adjacent(q, c) && graphHasNoFinalizedNodesNear(g, c)
         );
       },
     ],
-    applyToGraph: (g, nodes) =>
-      nodes.slice(0, 3).map(({ x, y }) => (g.nodes[x][y].finalized = true)),
+    applyToGraph: (g, nodes) => nodes.slice(0, 3).map((c) => g.finalize(c)),
   },
 
   // a
@@ -99,9 +88,7 @@ export default [
     name: "thing",
     metadata: { additionalWeight: -4 },
     searchNearPrevIndex: [-1],
-    applicabilityFuncs: [
-      (g, { x, y }) => g.nodes[x][y].active && !g.hasTags({ x, y }),
-    ],
+    applicabilityFuncs: [(g, c) => g.active(c) && !g.hasTags(c)],
     applyToGraph: () => {},
     mandatoryFeatures: [
       {
@@ -124,11 +111,9 @@ export default [
     },
     searchNearPrevIndex: [-1, 0],
     applicabilityFuncs: [
-      (g, { x, y }) => g.nodes[x][y].active,
-      (g, { x, y }, prev) =>
-        g.nodes[x][y].active &&
-        adjacent(prev, { x, y }) &&
-        !g.interlinked({ x, y }, prev),
+      (g, c) => g.active(c),
+      (g, c, prev) =>
+        g.active(c) && adjacent(prev, c) && !g.interlinked(c, prev),
     ],
     applyToGraph: (g, [a, b]) => g.enableLink(a, b),
     mandatoryFeatures: [
@@ -150,12 +135,11 @@ export default [
     },
     searchNearPrevIndex: [-1, 0],
     applicabilityFuncs: [
-      (g, { x, y }) => g.nodes[x][y].active,
-      (g, { x, y }, prev) => !g.nodes[x][y].active && adjacent(prev, { x, y }),
+      (g, c) => g.active(c),
+      (g, c, prev) => !g.active(c) && adjacent(prev, c),
     ],
     applyToGraph: (g, [a, b]) => {
-      g.enable(b);
-      g.enableLink(a, b);
+      g.enable(b).enableLink(a, b);
       moveRandomNodeTag(g, a, b);
     },
     mandatoryFeatures: [
@@ -179,21 +163,18 @@ export default [
     },
     searchNearPrevIndex: [-1, -1, 1],
     applicabilityFuncs: [
-      (g, { x, y }) =>
-        g.nodes[x][y].active &&
-        g.hasTags({ x, y }) &&
-        !g.hasTag({ x, y }, tags.Teleport) &&
-        !g.hasTag({ x, y }, tags.Start),
-      (g, { x, y }) => !g.nodes[x][y].active,
-      (g, { x, y }, _, b) => !g.nodes[x][y].active && adjacent({ x, y }, b),
+      (g, c) =>
+        g.active(c) &&
+        g.hasTags(c) &&
+        !g.hasTag(c, tags.Teleport) &&
+        !g.hasTag(c, tags.Start),
+      (g, c) => !g.active(c),
+      (g, c, _, b) => !g.active(c) && adjacent(c, b),
     ],
     applyToGraph: (g, [a, b, c]) => {
-      g.enable(b);
-      g.enable(c);
-      g.enableLink(b, c);
+      g.enable(b, c).enableLink(b, c);
       moveRandomNodeTag(g, a, c);
-      g.addNodeTag(a, tags.Teleport);
-      g.addNodeTagPreserverId(b, tags.Teleport);
+      g.addNodeTag(a, tags.Teleport).addNodeTagPreserveId(b, tags.Teleport);
     },
     optionalFeatures: [
       makeTagAdder(tags.Boss, 2),
@@ -210,15 +191,12 @@ export default [
     },
     searchNearPrevIndex: [-1, -1, 0],
     applicabilityFuncs: [
-      (g, { x, y }) => g.nodes[x][y].active,
-      (g, { x, y }, a) => g.nodes[x][y].active && !adjacent({ x, y }, a),
-      (g, { x, y }, a, b) =>
-        !g.nodes[x][y].active && adjacent({ x, y }, a) && adjacent({ x, y }, b),
+      (g, c) => g.active(c),
+      (g, c, a) => g.active(c) && !adjacent(c, a),
+      (g, c, a, b) => !g.active(c) && adjacent(c, a) && adjacent(c, b),
     ],
     applyToGraph: (g, [a, b, c]) => {
-      g.enable(c);
-      g.enableLink(a, c);
-      g.enableLink(c, b);
+      g.enable(c).enableLink(a, c).enableLink(c, b);
     },
     mandatoryFeatures: [
       makeOneTimePassageFeature(0, 2),
@@ -228,8 +206,7 @@ export default [
       {
         name: "secret passage",
         applyFeature: (g, [a, b, c]) => {
-          g.addEdgeTag(a, c, tags.SecretEdge);
-          g.addEdgeTag(c, b, tags.SecretEdge);
+          g.addEdgeTag(a, c, tags.SecretEdge).addEdgeTag(c, b, tags.SecretEdge);
           if (rng.randInRange(2) == 0) g.addNodeTag(c, randomHazard());
         },
       },
