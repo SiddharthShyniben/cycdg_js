@@ -421,7 +421,7 @@ export default [
   //           =>  ^       V
   // a > b   x     a > b < f
   {
-    name: "adjacent cycle 4",
+    name: "2 adjacent cycle +4",
     metadata: { addsCycle: true, enablesNodes: 4 },
     searchNearPrevIndex: [-1, 0, 0, 2, 3, 1],
     applicabilityFuncs: [
@@ -459,5 +459,34 @@ export default [
         applyFeature: (g, [_a, _b, c]) => g.addNodeTag(c, randomHazard()),
       },
     ],
+  },
+
+  //  x   x   x   x     d > e > f > g
+  //                =>  ^           V
+  //  a > b > c   x     a > b > c < h
+  {
+    name: "3 adjacent cycle +5",
+    metadata: { addsCycle: true, enablesNodes: 5 },
+    searchNearPrevIndex: [-1, 0, 1, 0, 3, 4, 5, 2],
+    applicabilityFuncs: [
+      (g, x) => g.active(x),
+      (g, x, a) => g.active(x) && adjacent(x, a) && g.isDirected(a, x),
+      (g, x, _, b) => g.active(x) && adjacent(b, x) && g.isDirected(a, x),
+      (g, x, a) => !g.active(x) && adjacent(a, x),
+      (g, x, _a, _b, _c, d) => !g.active(x) && adjacent(d, x),
+      (g, x, _a, _b, _c, _d, e) => !g.active(x) && adjacent(e, x),
+      (g, x, _a, _b, _c, _d, _e, f) => !g.active(x) && adjacent(f, x),
+      (G, x, a, _b, _c, _d, _e, _f, g) =>
+        !G.active(x) && adjacent(g, x) && adjacent(a, x),
+    ],
+    applyToGraph: (g, [a, _, c, d, e, f, g, h]) => {
+      g.enable(d, e, f, g, h)
+        .enableLink(a, d)
+        .enableLink(d, e)
+        .enableLink(e, f)
+        .enableLink(f, g)
+        .enableLink(g, h)
+        .enableLink(h, c);
+    },
   },
 ];
