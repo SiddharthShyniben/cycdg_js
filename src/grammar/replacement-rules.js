@@ -28,9 +28,9 @@ export default [
     metadata: { finalizesDisabledNodes: 1 },
     searchNearPrevIndex: [-1],
     applicabilityFuncs: [
-      (g, c) => !g.active(c) && graphHasNoFinalizedNodesNear(g, c),
+      (g, x) => !g.active(x) && graphHasNoFinalizedNodesNear(g, x),
     ],
-    applyToGraph: (g, c) => g.finalize(c),
+    applyToGraph: (g, x) => g.finalize(x),
   },
 
   // a b => x x
@@ -43,11 +43,11 @@ export default [
     },
     searchNearPrevIndex: [-1, 0],
     applicabilityFuncs: [
-      (g, c) => !g.active(c) && graphHasNoFinalizedNodesNear(g, c),
-      (g, c, a) =>
-        !g.active(c) && adjacent(a, c) && graphHasNoFinalizedNodesNear(g, c),
+      (g, x) => !g.active(x) && graphHasNoFinalizedNodesNear(g, x),
+      (g, x, a) =>
+        !g.active(x) && adjacent(a, x) && graphHasNoFinalizedNodesNear(g, x),
     ],
-    applyToGraph: (g, nodes) => nodes.slice(0, 2).map((c) => g.finalize(c)),
+    applyToGraph: (g, nodes) => nodes.slice(0, 2).map((x) => g.finalize(x)),
   },
 
   // a b c => x x x
@@ -60,27 +60,27 @@ export default [
     },
     searchNearPrevIndex: [-1, 0, 1],
     applicabilityFuncs: [
-      (g, c) => !g.active(c) && graphHasNoFinalizedNodesNear(g, c),
-      (g, c, a) =>
-        !g.active(c) && adjacent(a, c) && graphHasNoFinalizedNodesNear(g, c),
-      (g, c, p, q) => {
+      (g, x) => !g.active(x) && graphHasNoFinalizedNodesNear(g, x),
+      (g, x, a) =>
+        !g.active(x) && adjacent(a, x) && graphHasNoFinalizedNodesNear(g, x),
+      (g, x, a, b) => {
         const [w, h] = g.size();
 
         // Prevent L shape closing away the corner of the map
         if (
-          areCoordsAdjacentToRectCorner(c, vec(0), vec(w, h)) &&
-          areCoordsAdjacentToRectCorner(p, vec(0), vec(w, h)) &&
-          !areCoordsOnRect(q, vec(0), vec(w, h))
+          areCoordsAdjacentToRectCorner(x, vec(0), vec(w, h)) &&
+          areCoordsAdjacentToRectCorner(a, vec(0), vec(w, h)) &&
+          !areCoordsOnRect(b, vec(0), vec(w, h))
         ) {
           return false;
         }
 
         return (
-          !g.active(c) && adjacent(q, c) && graphHasNoFinalizedNodesNear(g, c)
+          !g.active(x) && adjacent(b, x) && graphHasNoFinalizedNodesNear(g, x)
         );
       },
     ],
-    applyToGraph: (g, nodes) => nodes.slice(0, 3).map((c) => g.finalize(c)),
+    applyToGraph: (g, nodes) => nodes.slice(0, 3).map((x) => g.finalize(x)),
   },
 
   // a
@@ -88,7 +88,7 @@ export default [
     name: "thing",
     metadata: { additionalWeight: -4 },
     searchNearPrevIndex: [-1],
-    applicabilityFuncs: [(g, c) => g.active(c) && !g.hasTags(c)],
+    applicabilityFuncs: [(g, x) => g.active(x) && !g.hasTags(x)],
     applyToGraph: () => {},
     mandatoryFeatures: [
       {
@@ -111,9 +111,8 @@ export default [
     },
     searchNearPrevIndex: [-1, 0],
     applicabilityFuncs: [
-      (g, c) => g.active(c),
-      (g, c, prev) =>
-        g.active(c) && adjacent(prev, c) && !g.interlinked(c, prev),
+      (g, x) => g.active(x),
+      (g, x, a) => g.active(x) && adjacent(a, x) && !g.interlinked(x, a),
     ],
     applyToGraph: (g, [a, b]) => g.enableLink(a, b),
     mandatoryFeatures: [
@@ -135,8 +134,8 @@ export default [
     },
     searchNearPrevIndex: [-1, 0],
     applicabilityFuncs: [
-      (g, c) => g.active(c),
-      (g, c, prev) => !g.active(c) && adjacent(prev, c),
+      (g, x) => g.active(x),
+      (g, x, a) => !g.active(x) && adjacent(a, x),
     ],
     applyToGraph: (g, [a, b]) => {
       g.enable(b).enableLink(a, b);
@@ -163,13 +162,13 @@ export default [
     },
     searchNearPrevIndex: [-1, -1, 1],
     applicabilityFuncs: [
-      (g, c) =>
-        g.active(c) &&
-        g.hasTags(c) &&
-        !g.hasTag(c, tags.Teleport) &&
-        !g.hasTag(c, tags.Start),
-      (g, c) => !g.active(c),
-      (g, c, _, b) => !g.active(c) && adjacent(c, b),
+      (g, x) =>
+        g.active(x) &&
+        g.hasTags(x) &&
+        !g.hasTag(x, tags.Teleport) &&
+        !g.hasTag(x, tags.Start),
+      (g, x) => !g.active(x),
+      (g, x, _, b) => !g.active(x) && adjacent(x, b),
     ],
     applyToGraph: (g, [a, b, c]) => {
       g.enable(b, c).enableLink(b, c);
@@ -182,7 +181,7 @@ export default [
     ],
   },
 
-  // a c b => a > c > b
+  // a x b => a > c > b
   {
     name: "connect via room",
     metadata: {
@@ -191,9 +190,9 @@ export default [
     },
     searchNearPrevIndex: [-1, -1, 0],
     applicabilityFuncs: [
-      (g, c) => g.active(c),
-      (g, c, a) => g.active(c) && !adjacent(c, a),
-      (g, c, a, b) => !g.active(c) && adjacent(c, a) && adjacent(c, b),
+      (g, x) => g.active(x),
+      (g, x, a) => g.active(x) && !adjacent(x, a),
+      (g, x, a, b) => !g.active(x) && adjacent(x, a) && adjacent(x, b),
     ],
     applyToGraph: (g, [a, b, c]) => {
       g.enable(c).enableLink(a, c).enableLink(c, b);
@@ -229,27 +228,22 @@ export default [
     metadata: { enablesNodes: 2 },
     searchNearPrevIndex: [-1, 0, 0, 1],
     applicabilityFuncs: [
-      (g, { x, y }) => g.nodes[x][y].active,
-      (g, { x, y }, a) =>
-        g.nodes[x][y].active &&
-        adjacent(a, { x, y }) &&
-        g.isDirected(a, { x, y }),
-      (g, { x, y }, a) => !g.nodes[x][y].active && adjacent(a, { x, y }),
-      (g, { x, y }, _a, b, c) =>
-        !g.nodes[x][y].active && adjacent(b, { x, y }) && adjacent(c, { x, y }),
+      (g, x) => g.active(x),
+      (g, x, a) => g.active(x) && adjacent(a, x) && g.isDirected(a, x),
+      (g, x, a) => !g.active(x) && adjacent(a, x),
+      (g, x, _, b, c) => !g.active(x) && adjacent(b, x) && adjacent(c, x),
     ],
     applyToGraph: (g, [a, b, c, d]) => {
-      g.enable(c);
-      g.enable(d);
-      g.enableLink(a, c);
-      g.enableLink(c, d);
-      g.enableLink(d, b);
-      g.disableLink(a, b);
+      g.enable(c, d)
+        .enableLink(a, c)
+        .enableLink(c, d)
+        .enableLink(d, b)
+        .disableLink(a, b);
     },
     mandatoryFeatures: [
       {
         name: "swap ab <> ac",
-        applyFeature: (g, [a, b, c, _d]) => {
+        applyFeature: (g, [a, b, c]) => {
           g.swapEdgeTags(a, b, a, c);
         },
       },
@@ -261,7 +255,7 @@ export default [
       },
       {
         name: "swap ab <> db",
-        applyFeature: (g, [a, b, _c, d]) => {
+        applyFeature: (g, [a, b, _, d]) => {
           g.swapEdgeTags(a, b, d, b);
         },
       },
@@ -284,26 +278,18 @@ export default [
     metadata: { addsCycle: true, enablesNodes: 2 },
     searchNearPrevIndex: [-1, 0, 0, 1],
     applicabilityFuncs: [
-      (g, { x, y }) => g.nodes[x][y].active,
-      (g, { x, y }, a) =>
-        g.nodes[x][y].active &&
-        adjacent(a, { x, y }) &&
-        g.isDirected({ x, y }, a),
-      (g, { x, y }, a) => !g.nodes[x][y].active && adjacent(a, { x, y }),
-      (g, { x, y }, _a, b, c) =>
-        !g.nodes[x][y].active && adjacent(b, { x, y }) && adjacent(c, { x, y }),
+      (g, x) => g.active(x),
+      (g, x, a) => g.active(x) && adjacent(a, x) && g.isDirected(x, a),
+      (g, x, a) => !g.active(x) && adjacent(a, x),
+      (g, x, _, b, c) => !g.active(x) && adjacent(b, x) && adjacent(c, x),
     ],
     applyToGraph: (g, [a, b, c, d]) => {
-      g.enable(c);
-      g.enable(d);
-      g.enableLink(a, c);
-      g.enableLink(c, d);
-      g.enableLink(d, b);
+      g.enable(c, d).enableLink(a, c).enableLink(c, d).enableLink(d, b);
     },
     mandatoryFeatures: [
       {
         name: "copy ab <> ac",
-        applyFeature: (g, [a, b, c, _d]) => {
+        applyFeature: (g, [a, b, c]) => {
           g.copyEdgeTagsPreservingIds(a, b, a, c);
         },
       },
@@ -328,32 +314,22 @@ export default [
     metadata: {},
     searchNearPrevIndex: [-1, 0, 0, 1],
     applicabilityFuncs: [
-      (g, { x, y }) =>
-        g.nodes[x][y].active &&
-        g.edgeCount({ x, y }) == 2 &&
-        !g.nodes[x][y].flagged,
-      (g, { x, y }, a) =>
-        g.nodes[x][y].active &&
-        adjacent({ x, y }, a) &&
-        g.isDirected({ x, y }, a),
-      (g, { x, y }, a) =>
-        g.nodes[x][y].active &&
-        adjacent({ x, y }, a) &&
-        g.isDirected(a, { x, y }),
-      (g, { x, y }, _, b, c) =>
-        !g.nodes[x][y].active && adjacent({ x, y }, b) && adjacent({ x, y }, c),
+      (g, x) => g.active(x) && g.edgeCount(x) == 2 && !g.get(x).flagged,
+      (g, x, a) => g.active(x) && adjacent(x, a) && g.isDirected(x, a),
+      (g, x, a) => g.active(x) && adjacent(x, a) && g.isDirected(a, x),
+      (g, x, _, b, c) => !g.active(x) && adjacent(x, b) && adjacent(x, c),
     ],
     applyToGraph: (g, [a, b, c, d]) => {
-      g.enable(d);
-      g.enableLink(b, d);
-      g.enableLink(d, c);
-      g.disableLink(b, a);
-      g.disableLink(a, c);
-      g.swapTags(a, d);
-      g.nodes[d.x][d.y].flagged = true;
-      g.copyEdgeTagsPreservingIds(b, a, b, d);
-      g.copyEdgeTagsPreservingIds(a, c, d, c);
-      g.reset(a);
+      g.enable(d)
+        .enableLink(b, d)
+        .enableLink(d, c)
+        .disableLink(b, a)
+        .disableLink(a, c)
+        .swapTags(a, d);
+      g.get(d).flagged = true;
+      g.copyEdgeTagsPreservingIds(b, a, b, d)
+        .copyEdgeTagsPreservingIds(a, c, d, c)
+        .reset(a);
     },
   },
 
@@ -365,20 +341,17 @@ export default [
     metadata: { addsCycle: true, enablesNodes: 3 },
     searchNearPrevIndex: [-1, 0, 0, 1],
     applicabilityFuncs: [
-      (g, { x, y }) => g.nodes[x][y].active,
-      (g, { x, y }, a) => !g.nodes[x][y].active && adjacent({ x, y }, a),
-      (g, { x, y }, a) => !g.nodes[x][y].active && adjacent({ x, y }, a),
-      (g, { x, y }, _a, b, c) =>
-        !g.nodes[x][y].active && adjacent({ x, y }, b) && adjacent({ x, y }, c),
+      (g, x) => g.active(x),
+      (g, x, a) => !g.active(x) && adjacent(x, a),
+      (g, x, a) => !g.active(x) && adjacent(x, a),
+      (g, x, _, b, c) => !g.active(x) && adjacent(x, b) && adjacent(x, c),
     ],
     applyToGraph: (g, [a, b, c, d]) => {
-      g.enable(b);
-      g.enable(c);
-      g.enable(d);
-      g.enableLink(a, b);
-      g.enableLink(b, d);
-      g.enableLink(d, c);
-      g.enableLink(c, a);
+      g.enable(b, c, d)
+        .enableLink(a, b)
+        .enableLink(b, d)
+        .enableLink(d, c)
+        .enableLink(c, a);
     },
     optionalFeatures: [
       makeOneWayPassageFeature(0, 1, 2, 0),
@@ -387,17 +360,17 @@ export default [
       {
         name: "secret or hazard",
         applyFeature: (g, [a, _, c, d]) => {
-          g.addNodeTag(d, tags.Boss);
-          g.addNodeTag(c, tags.Treasure);
-          g.addEdgeTag(c, a, tags.SecretEdge);
+          g.addNodeTag(d, tags.Boss)
+            .addNodeTag(c, tags.Treasure)
+            .addEdgeTag(c, a, tags.SecretEdge);
         },
       },
       {
         name: "forced boss",
         applyFeature: (g, [a, b, c, d]) => {
-          g.addNodeTag(d, tags.Boss);
-          g.addEdgeTag(a, b, tags.OneTimeEdge);
-          g.addEdgeTag(c, a, tags.OneTimeEdge);
+          g.addNodeTag(d, tags.Boss)
+            .addEdgeTag(a, b, tags.OneTimeEdge)
+            .addEdgeTag(c, a, tags.OneTimeEdge);
         },
       },
     ],
@@ -411,29 +384,20 @@ export default [
     metadata: { addsCycle: true, enablesNodes: 3 },
     searchNearPrevIndex: [-1, 0, 1, 0, 3, 2],
     applicabilityFuncs: [
-      (g, { x, y }) => g.nodes[x][y].active,
-      (g, { x, y }, a) =>
-        g.nodes[x][y].active &&
-        adjacent({ x, y }, a) &&
-        g.isDirected(a, { x, y }),
-      (g, { x, y }, _a, b) =>
-        g.nodes[x][y].active &&
-        adjacent({ x, y }, b) &&
-        g.isDirected(b, { x, y }),
-      (g, { x, y }, a) => !g.nodes[x][y].active && adjacent({ x, y }, a),
-      (g, { x, y }, _a, _b, _c, d) =>
-        !g.nodes[x][y].active && adjacent({ x, y }, d),
-      (g, { x, y }, _a, _b, c, _d, e) =>
-        !g.nodes[x][y].active && adjacent({ x, y }, e) && adjacent({ x, y }, c),
+      (g, x) => g.active(x),
+      (g, x, a) => g.active(x) && adjacent(x, a) && g.isDirected(a, x),
+      (g, x, _a, b) => g.active(x) && adjacent(x, b) && g.isDirected(b, x),
+      (g, x, a) => !g.active(x) && adjacent(x, a),
+      (g, x, _a, _b, _c, d) => !g.active(x) && adjacent(x, d),
+      (g, x, _a, _b, c, _d, e) =>
+        !g.active(x) && adjacent(x, e) && adjacent(x, c),
     ],
     applyToGraph: (g, [a, b, c, d, e, f]) => {
-      g.enable(d);
-      g.enable(e);
-      g.enable(f);
-      g.enableLink(a, d);
-      g.enableLink(d, e);
-      g.enableLink(e, f);
-      g.enableLink(f, c);
+      g.enable(d, e, f)
+        .enableLink(a, d)
+        .enableLink(d, e)
+        .enableLink(e, f)
+        .enableLink(f, c);
       if (!g.hasTags(b)) g.addNodeTag(b, randomHazard());
     },
     mandatoryFeatures: [
@@ -461,29 +425,21 @@ export default [
     metadata: { addsCycle: true, enablesNodes: 4 },
     searchNearPrevIndex: [-1, 0, 0, 2, 3, 1],
     applicabilityFuncs: [
-      (g, { x, y }) => g.nodes[x][y].active,
-      (g, { x, y }, a) =>
-        g.nodes[x][y].active &&
-        adjacent({ x, y }, a) &&
-        g.isDirected(a, { x, y }),
-      (g, { x, y }, a) => !g.nodes[x][y].active && adjacent(a, { x, y }),
-      (g, { x, y }, _a, _b, c) =>
-        !g.nodes[x][y].active && adjacent(c, { x, y }),
-      (g, { x, y }, _a, _b, _c, d) =>
-        !g.nodes[x][y].active && adjacent(d, { x, y }),
-      (g, { x, y }, _a, b, _c, _d, e) =>
-        !g.nodes[x][y].active && adjacent(e, { x, y }) && adjacent(b, { x, y }),
+      (g, x) => g.active(x),
+      (g, x, a) => g.active(x) && adjacent(x, a) && g.isDirected(a, x),
+      (g, x, a) => !g.active(x) && adjacent(a, x),
+      (g, x, _a, _b, c) => !g.active(x) && adjacent(c, x),
+      (g, x, _a, _b, _c, d) => !g.active(x) && adjacent(d, x),
+      (g, x, _a, b, _c, _d, e) =>
+        !g.active(x) && adjacent(e, x) && adjacent(b, x),
     ],
     applyToGraph: (g, [a, b, c, d, e, f]) => {
-      g.enable(c);
-      g.enable(d);
-      g.enable(e);
-      g.enable(f);
-      g.enableLink(a, c);
-      g.enableLink(c, d);
-      g.enableLink(d, e);
-      g.enableLink(e, f);
-      g.enableLink(f, b);
+      g.enable(c, d, e, f)
+        .enableLink(a, c)
+        .enableLink(c, d)
+        .enableLink(d, e)
+        .enableLink(e, f)
+        .enableLink(f, b);
     },
     mandatoryFeatures: [
       {

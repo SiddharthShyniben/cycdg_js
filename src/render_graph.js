@@ -32,7 +32,7 @@ export const drawGraph = (GRA) => {
     let cells = [];
 
     for (const x of range(w)) {
-      const node = graph.nodes[x][y];
+      const node = graph.get(x, y);
 
       let item = {
         node,
@@ -63,12 +63,9 @@ export const drawGraph = (GRA) => {
       else item.bg = color.blackBg;
 
       const t = [];
-      for (const tag of tagsToCheck) {
-        if (hasTag(node, tag)) t.push(tag);
-      }
-      item.text = t.join(", ");
+      for (const tag of tagsToCheck) if (hasTag(node, tag)) t.push(tag);
 
-      item.text = item.text.padEnd(9 * 5, " ");
+      item.text = t.join(", ").padEnd(9 * 5, " ");
 
       cells.push(item);
     }

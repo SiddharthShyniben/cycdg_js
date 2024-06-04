@@ -118,8 +118,8 @@ export const moveRandomNodeTag = (graph, from, to) => {
   if (!isTagMovable(tag)) return null;
   const i = tags.indexOf(tag);
 
-  graph.nodes[to.x][to.y].tags.push(tag);
-  graph.nodes[from.x][from.y].tags.splice(i, 1);
+  graph.addNodeTag(to, tag);
+  graph.get(from).tags.splice(i, 1);
 };
 
 export const pushNodeContensInRandomDirection = (g, c) => {
@@ -134,9 +134,7 @@ export const pushNodeContensInRandomDirection = (g, c) => {
 
   if (!pushTo || !areAllNodeTagsMovable(g, c)) return;
 
-  g.enable(pushTo);
-  g.enableLink(c, pushTo);
-  g.swapTags(c, pushTo);
+  g.enable(pushTo).enableLink(c, pushTo).swapTags(c, pushTo);
 };
 
 export const pushNodeContensInRandomDirectionWithEdgeTag = (g, c, tag) => {
@@ -149,10 +147,10 @@ export const pushNodeContensInRandomDirectionWithEdgeTag = (g, c, tag) => {
 
   if (!pushTo || !areAllNodeTagsMovable(g, c)) return;
 
-  g.enable(pushTo);
-  g.enableLink(c, pushTo);
-  g.addEdgeTag(c, pushTo, tag);
-  g.swapTags(c, pushTo);
+  g.enable(pushTo)
+    .enableLink(c, pushTo)
+    .addEdgeTag(c, pushTo, tag)
+    .swapTags(c, pushTo);
 };
 
 export const addTagAtRandomActiveNode = (graph, tag) =>
