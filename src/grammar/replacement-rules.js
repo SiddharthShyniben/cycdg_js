@@ -471,7 +471,7 @@ export default [
     applicabilityFuncs: [
       (g, x) => g.active(x),
       (g, x, a) => g.active(x) && adjacent(x, a) && g.isDirected(a, x),
-      (g, x, _, b) => g.active(x) && adjacent(b, x) && g.isDirected(a, x),
+      (g, x, _, b) => g.active(x) && adjacent(b, x) && g.isDirected(b, x),
       (g, x, a) => !g.active(x) && adjacent(a, x),
       (g, x, _a, _b, _c, d) => !g.active(x) && adjacent(d, x),
       (g, x, _a, _b, _c, _d, e) => !g.active(x) && adjacent(e, x),
@@ -479,8 +479,8 @@ export default [
       (G, x, a, _b, _c, _d, _e, _f, g) =>
         !G.active(x) && adjacent(g, x) && adjacent(a, x),
     ],
-    applyToGraph: (g, [a, _, c, d, e, f, g, h]) => {
-      g.enable(d, e, f, g, h)
+    applyToGraph: (G, [a, _, c, d, e, f, g, h]) => {
+      G.enable(d, e, f, g, h)
         .enableLink(a, d)
         .enableLink(d, e)
         .enableLink(e, f)

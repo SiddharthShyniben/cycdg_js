@@ -24,8 +24,8 @@ export default [
       debug(`applying non-adjacent cycle at ${fmt(coords)}`);
 
       const [w, h] = g.size();
-      const rw = rng.randInRange(3, w - x),
-        rh = rng.randInRange(3, h - y);
+      const rw = rng.randInRange(3, w - coords.x),
+        rh = rng.randInRange(3, h - coords.y);
 
       debug(`drawing rect of size ${fmt(rw, rh)}`);
 
@@ -125,8 +125,8 @@ export default [
     applyOnGraphAt: (g, coords) => {
       debug("applying adjacent cycle");
       const [w, h] = g.size();
-      const rw = rng.randInRange(3, w - x),
-        rh = rng.randInRange(3, h - y);
+      const rw = rng.randInRange(3, w - coords.x),
+        rh = rng.randInRange(3, h - coords.y);
 
       debug(`drawing rect of size ${fmt(rw, rh)}`);
 

@@ -36,8 +36,6 @@ export class GraphReplacementApplier {
     this.width = clamp(width, 4, 25);
     this.height = clamp(height, 5, 25);
 
-    this.graph = new Graph(this.width, this.height);
-
     this.minCycles = clamp(minCycles || 3, 1, 100);
     this.maxCycles = clamp(maxCycles || 8, 1, 100);
     this.desiredFeatures = clamp(desiredFeatures || 5, 0, 1000);
@@ -53,6 +51,8 @@ export class GraphReplacementApplier {
   }
 
   reset() {
+    this.graph = new Graph(this.width, this.height);
+
     this.desiredFillPercentage = rng.randInRange(
       this.minFilledPercentage,
       this.maxFilledPercentage,
@@ -69,13 +69,16 @@ export class GraphReplacementApplier {
     this.applyRandomInitialRule();
   }
 
+  shouldStop() {
+    return this.filledEnough() || this.cyclesCount >= this.maxCycles;
+  }
+
   filledEnough() {
     if (this.desiredFillPercentage == 0)
       error("desired fill percentage is zero");
     const size = this.width * this.height;
-    const currentPercentage = (100 * this.enabledNodesCount + size / 2) / size;
-    const currentPlusOne =
-      (100 * (this.enabledNodesCount + 1) + size / 2) / size;
+    const currentPercentage = (100 * this.enabledNodesCount) / size;
+    const currentPlusOne = (100 * (this.enabledNodesCount + 1)) / size;
     return (
       currentPercentage == this.desiredFillPercentage ||
       currentPlusOne > this.desiredFillPercentage
@@ -83,17 +86,19 @@ export class GraphReplacementApplier {
   }
 
   stringifyGenerationMetadata() {
-    const enabledNodesCount = this.graph.countEnabled();
     const size = this.width * this.height;
-    const enabledPercentage = (100 * enabledNodesCount + size / 2) / size;
+    const enabledPercentage = (100 * this.enabledNodesCount) / size;
     return [
       `Seed: ${rng.seed}`,
       `Rules: ${this.appliedRulesCount}`,
-      `Cycles: ${this.cyclesCount}`,
+      `Cycles: ${this.cyclesCount}/${this.maxCycles}`,
       `Disabled: ${this.finalizedDisabledNodesCount}`,
       `Filled: ${enabledPercentage}/${this.desiredFillPercentage}%`,
       `Free non-adjacent: ${countEmptyEditableNodesNearEnabledOnes(this.graph)}`,
-    ].join(color.dim(" / "));
+      this.shouldStop() ? color.red("DONE") : null,
+    ]
+      .filter(Boolean)
+      .join(color.dim(" / "));
   }
 
   applyRandomInitialRule() {
@@ -268,8 +273,7 @@ export class GraphReplacementApplier {
   shouldFeatureBeAdded() {
     if (this.desiredFeatures <= this.appliedFeaturesCount) return false;
     const featuresPercent =
-      (100 * this.appliedFeaturesCount + this.desiredFeatures / 2) /
-      this.desiredFeatures;
+      (100 * this.appliedFeaturesCount) / this.desiredFeatures;
     return rng.randInRange(120) > featuresPercent;
   }
 

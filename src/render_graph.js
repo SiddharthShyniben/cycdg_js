@@ -59,8 +59,7 @@ export const drawGraph = (GRA) => {
 
       if (start || goal) (item.bg = color.redBg), (item.fg = color.black);
       else if (node.active) (item.bg = color.blueBg), (item.fg = color.black);
-      else if (node.finalized) item.bg = color.yellowBg;
-      else item.bg = color.blackBg;
+      else if (!node.finalized) item.bg = color.blackBg;
 
       const t = [];
       for (const tag of tagsToCheck) if (hasTag(node, tag)) t.push(tag);

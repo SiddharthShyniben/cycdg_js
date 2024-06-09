@@ -17,15 +17,15 @@ process.stdin.on("keypress", function (_, key) {
       let done = false;
 
       if (key.name == "return") {
-        while (!GRA.filledEnough() || !done) {
+        while (!(GRA.shouldStop() || done)) {
           done = GRA.applyRandomReplacementRule();
-
           drawGraph(GRA);
         }
+        if (GRA.shouldStop()) GRA.reset();
       } else {
         done = GRA.applyRandomReplacementRule();
-
         drawGraph(GRA);
+        if (GRA.shouldStop()) GRA.reset();
       }
     }
   }
