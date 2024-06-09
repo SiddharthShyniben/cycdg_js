@@ -328,7 +328,7 @@ export default [
       g.get(d).flagged = true;
       g.copyEdgeTagsPreservingIds(b, a, b, d)
         .copyEdgeTagsPreservingIds(a, c, d, c)
-        .reset(a);
+        .resetNode(a);
     },
   },
 

@@ -22,6 +22,8 @@ process.stdin.on("keypress", function (_, key) {
           drawGraph(GRA);
         }
         if (GRA.shouldStop()) GRA.reset();
+      } else if (key.name == "d") {
+        console.log(GRA.graph.nodes);
       } else {
         done = GRA.applyRandomReplacementRule();
         drawGraph(GRA);

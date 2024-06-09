@@ -196,6 +196,16 @@ export class Graph {
     return this;
   }
 
+  resetNode(c) {
+    resetNode(this.get(c)); // NOTE: just loop edges from node?
+    for (const dir of cardinalDirections) {
+      if (this.inBounds(add(c, dir))) {
+        resetEdge(this.edgeVec(c, dir));
+      }
+    }
+    return this;
+  }
+
   countEnabled() {
     return this.nodes
       .flat()
