@@ -1,6 +1,5 @@
 import { adjacent, vec } from "../coords.js";
 import { tags } from "../graph.js";
-import { rng } from "../rng.js";
 import {
   areCoordsAdjacentToRectCorner,
   areCoordsOnRect,
@@ -97,7 +96,7 @@ export default [
       },
       {
         name: "hazard",
-        applyFeature: (g, node) => g.addNodeTag(node, randomHazard()),
+        applyFeature: (g, node) => g.addNodeTag(node, randomHazard(g)),
       },
     ],
   },
@@ -206,14 +205,14 @@ export default [
         name: "secret passage",
         applyFeature: (g, [a, b, c]) => {
           g.addEdgeTag(a, c, tags.SecretEdge).addEdgeTag(c, b, tags.SecretEdge);
-          if (rng.randInRange(2) == 0) g.addNodeTag(c, randomHazard());
+          if (g.rng.randInRange(2) == 0) g.addNodeTag(c, randomHazard(g));
         },
       },
     ],
     optionalFeatures: [
       {
         name: "hazard",
-        applyFeature: (g, [_a, _b, c]) => g.addNodeTag(c, randomHazard()),
+        applyFeature: (g, [_a, _b, c]) => g.addNodeTag(c, randomHazard(g)),
       },
       makeMasterLockFeature(2, 1),
       makeTagAdder(tags.Treasure, 2),
@@ -264,7 +263,7 @@ export default [
       {
         name: "boss",
         applyFeature: (g, nodes) =>
-          g.addNodeTag(nodes[rng.randInRange(2) + 2], tags.Boss),
+          g.addNodeTag(nodes[g.rng.randInRange(2) + 2], tags.Boss),
       },
       makeWindowPassageFeature(0, 1),
     ],
@@ -301,7 +300,7 @@ export default [
     optionalFeatures: [
       {
         name: "hazard",
-        applyFeature: (g, [_a, _b, _c, d]) => g.addNodeTag(d, randomHazard()),
+        applyFeature: (g, [_a, _b, _c, d]) => g.addNodeTag(d, randomHazard(g)),
       },
     ],
   },
@@ -398,7 +397,7 @@ export default [
         .enableLink(d, e)
         .enableLink(e, f)
         .enableLink(f, c);
-      if (!g.hasTags(b)) g.addNodeTag(b, randomHazard());
+      if (!g.hasTags(b)) g.addNodeTag(b, randomHazard(g));
     },
     mandatoryFeatures: [
       null,
@@ -412,7 +411,7 @@ export default [
       {
         name: "hazard",
         applyFeature: (g, [_a, _b, _c, _d, e]) =>
-          g.addNodeTag(e, randomHazard()),
+          g.addNodeTag(e, randomHazard(g)),
       },
     ],
   },
@@ -456,7 +455,7 @@ export default [
     optionalFeatures: [
       {
         name: "hazard",
-        applyFeature: (g, [_a, _b, c]) => g.addNodeTag(c, randomHazard()),
+        applyFeature: (g, [_a, _b, c]) => g.addNodeTag(c, randomHazard(g)),
       },
     ],
   },

@@ -1,7 +1,6 @@
 import { cardinalDirections, diagonalDirections } from "../graph.js";
 import { error, range } from "../util.js";
 import { fmt, is, spread, vec } from "../coords.js";
-import { rng } from "../rng.js";
 import unbug from "unbug";
 
 const debug = unbug("helper");
@@ -28,7 +27,7 @@ export const getCandidateCellForRule = (rule, graph) => {
     }
   }
 
-  return rng.fromArr(candidates);
+  return graph.rng.fromArr(candidates);
 };
 
 export const tryFindAllApplicableCoordVariantsRecursively = (
@@ -114,7 +113,7 @@ export const getRandomApplicableCoordsForRule = (rule, graph) => {
     }
   }
 
-  return rng.fromArr(candidates);
+  return graph.rng.fromArr(candidates);
 };
 
 export const graphHasNoFinalizedNodesNear = (g, { x, y }) => {

@@ -2,7 +2,6 @@ import unbug from "unbug";
 import color from "@nuff-said/color";
 import { adjacent, fmt, vec } from "./coords.js";
 import { hasTag, tags } from "./graph.js";
-import { rng } from "./rng.js";
 
 const debug = unbug("util");
 
@@ -75,7 +74,7 @@ export const getRandomGraphCoordsByFunc = (graph, fn) => {
     }
   }
 
-  return rng.fromArr(candidates);
+  return graph.rng.fromArr(candidates);
 };
 
 export const getRandomGraphCoordsByScore = (graph, fn) => {
@@ -93,7 +92,7 @@ export const getRandomGraphCoordsByScore = (graph, fn) => {
     }
   }
 
-  return rng.weightedFromArr(candidates, scores);
+  return graph.rng.weightedFromArr(candidates, scores);
 };
 
 export const doesGraphContainNodeTag = (g, tag) =>
@@ -107,14 +106,14 @@ export const isTagMovable = (tag) =>
 export const areAllNodeTagsMovable = (g, { x, y }) =>
   g.nodes[x][y].tags.every(isTagMovable);
 
-export const randomHazard = () =>
-  rng.fromArr([tags.Boss, tags.Trap, tags.Hazard]);
+export const randomHazard = (graph) =>
+  graph.rng.fromArr([tags.Boss, tags.Trap, tags.Hazard]);
 
 export const moveRandomNodeTag = (graph, from, to) => {
   const { tags } = graph.nodes[from.x][from.y];
   if (!tags.length) return;
 
-  const tag = rng.fromArr(tags);
+  const tag = graph.rng.fromArr(tags);
   if (!isTagMovable(tag)) return null;
   const i = tags.indexOf(tag);
 

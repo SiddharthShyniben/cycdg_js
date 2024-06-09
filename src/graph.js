@@ -71,12 +71,20 @@ export const edgeHasLinkToVector = (n, a) => getEdgeByVector(n, a).enabled;
 //////////////////////////////////////////////////////////////////////
 
 export class Graph {
-  constructor(w, h) {
+  constructor(w, h, rng) {
     debug(`Creating graph of dimensions ${fmt(vec(w, h))}`);
 
     this.width = w;
     this.height = h;
+    this.rng = rng;
     this.nodes = arr2d(w, h).map((row) => row.map(() => node()));
+    this.appliedTags = {};
+  }
+
+  reset() {
+    this.nodes = arr2d(this.width, this.height).map((row) =>
+      row.map(() => node()),
+    );
     this.appliedTags = {};
   }
 
@@ -185,16 +193,6 @@ export class Graph {
 
   enable(...c) {
     for (const x of c) this.get(x).active = true;
-    return this;
-  }
-
-  reset(c) {
-    resetNode(this.get(c)); // NOTE: just loop edges from node?
-    for (const dir of cardinalDirections) {
-      if (this.inBounds(add(c, dir))) {
-        resetEdge(this.edgeVec(c, dir));
-      }
-    }
     return this;
   }
 

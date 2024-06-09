@@ -12,7 +12,7 @@ import {
   isRuleApplicableForGraph,
   tryFindAllApplicableCoordVariantsRecursively,
 } from "./grammar/helper.js";
-import { rng } from "./rng.js";
+import { RNG } from "./rng.js";
 import { fmt } from "./coords.js";
 import replacementRules from "./grammar/replacement-rules.js";
 
@@ -47,14 +47,17 @@ export class GraphReplacementApplier {
     if (this.maxFilledPercentage < this.minFilledPercentage)
       this.maxFilledPercentage = this.minFilledPercentage;
 
+    this.rng = new RNG();
+    this.graph = new Graph(this.width, this.height, this.rng);
+
     this.reset();
   }
 
   reset() {
-    rng.reset();
-    this.graph = new Graph(this.width, this.height);
+    this.rng.reset();
+    this.graph.reset();
 
-    this.desiredFillPercentage = rng.randInRange(
+    this.desiredFillPercentage = this.rng.randInRange(
       this.minFilledPercentage,
       this.maxFilledPercentage,
     );
@@ -90,7 +93,7 @@ export class GraphReplacementApplier {
     const size = this.width * this.height;
     const enabledPercentage = (100 * this.enabledNodesCount) / size;
     return [
-      `Seed: ${rng.seed}`,
+      `Seed: ${this.rng.seed}`,
       `Rules: ${this.appliedRulesCount}`,
       `Cycles: ${this.cyclesCount}/${this.maxCycles}`,
       `Disabled: ${this.finalizedDisabledNodesCount}`,
@@ -104,7 +107,7 @@ export class GraphReplacementApplier {
 
   applyRandomInitialRule() {
     debug("Applying random inital rule");
-    const rule = allInitalRules[rng.randInRange(allInitalRules.length)];
+    const rule = allInitalRules[this.rng.randInRange(allInitalRules.length)];
     if (isRuleApplicableForGraph(rule, this.graph)) this.applyInitialRule(rule);
     else console.error("Rule failed!", rule.name);
     this.enabledNodesCount = this.graph.countEnabled();
@@ -136,12 +139,12 @@ export class GraphReplacementApplier {
   }
 
   applyInitialRule(rule) {
-    const c = getRandomApplicableCoordsForRule(rule, this.graph);
+    const c = getRandomApplicableCoordsForRule(rule, this.graph, this.rng);
 
     debug(`Applying ${rule.name} at ${fmt(c)}`);
     rule.applyOnGraphAt(this.graph, c);
 
-    const appliedFeature = rng.fromArr(rule.mandatoryFeatures);
+    const appliedFeature = this.rng.fromArr(rule.mandatoryFeatures);
 
     debug(`Applying feature ${appliedFeature.name}`);
     appliedFeature.applyFeature(this.graph);
@@ -160,7 +163,7 @@ export class GraphReplacementApplier {
   }
 
   applyReplacementRule(rule, coords) {
-    const c = rng.fromArr(coords);
+    const c = this.rng.fromArr(coords);
 
     debug("Applying", rule.name, "at", c);
 
@@ -205,7 +208,7 @@ export class GraphReplacementApplier {
   }
 
   selectRandomRuleToApply() {
-    return rng.weightedFromArr(replacementRules, (r) => {
+    return this.rng.weightedFromArr(replacementRules, (r) => {
       const {
         metadata: {
           enablesNodes,
@@ -259,12 +262,12 @@ export class GraphReplacementApplier {
   }
 
   selectRandomMandatoryFeatureToApply(rule) {
-    if (rule.mandatoryFeatures) return rng.fromArr(rule.mandatoryFeatures);
+    if (rule.mandatoryFeatures) return this.rng.fromArr(rule.mandatoryFeatures);
   }
 
   selectRandomOptionalFeatureToApply(rule) {
     if (this.shouldFeatureBeAdded() && rule.optionalFeatures) {
-      return rng.weightedFromArr(
+      return this.rng.weightedFromArr(
         rule.optionalFeatures,
         (x) => x.additionalWeight + BASE_RULE_WEIGHT,
       );
@@ -275,7 +278,7 @@ export class GraphReplacementApplier {
     if (this.desiredFeatures <= this.appliedFeaturesCount) return false;
     const featuresPercent =
       (100 * this.appliedFeaturesCount) / this.desiredFeatures;
-    return rng.randInRange(120) > featuresPercent;
+    return this.rng.randInRange(120) > featuresPercent;
   }
 
   updateMetadataStatsOnRuleApply(rule, mandatoryFeature, optionalFeature, c) {

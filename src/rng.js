@@ -47,5 +47,3 @@ export class RNG {
     return this.fromArr(weighted);
   }
 }
-
-export const rng = new RNG();

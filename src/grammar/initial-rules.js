@@ -1,6 +1,5 @@
 import { add, adjacent, fmt, is, manhattan, vec } from "../coords.js";
 import { tags } from "../graph.js";
-import { rng } from "../rng.js";
 import {
   areCoordsInRectCorner,
   areCoordsOnRect,
@@ -24,8 +23,8 @@ export default [
       debug(`applying non-adjacent cycle at ${fmt(coords)}`);
 
       const [w, h] = g.size();
-      const rw = rng.randInRange(3, w - coords.x),
-        rh = rng.randInRange(3, h - coords.y);
+      const rw = g.rng.randInRange(3, w - coords.x),
+        rh = g.rng.randInRange(3, h - coords.y);
 
       debug(`drawing rect of size ${fmt(rw, rh)}`);
 
@@ -70,9 +69,9 @@ export default [
 
           feat(`adding random hazard to ${fmt(c1)} and ${fmt(c2)}`);
 
-          g.addNodeTag(c1, randomHazard()).addNodeTag(c2, randomHazard());
+          g.addNodeTag(c1, randomHazard(g)).addNodeTag(c2, randomHazard(g));
 
-          if (rng.randInRange(0, 3) == 0) {
+          if (g.rng.randInRange(0, 3) == 0) {
             feat("pushing goal in random direction");
             pushNodeContensInRandomDirection(g, goal);
           }
@@ -125,8 +124,8 @@ export default [
     applyOnGraphAt: (g, coords) => {
       debug("applying adjacent cycle");
       const [w, h] = g.size();
-      const rw = rng.randInRange(3, w - coords.x),
-        rh = rng.randInRange(3, h - coords.y);
+      const rw = g.rng.randInRange(3, w - coords.x),
+        rh = g.rng.randInRange(3, h - coords.y);
 
       debug(`drawing rect of size ${fmt(rw, rh)}`);
 
