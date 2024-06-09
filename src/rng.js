@@ -1,12 +1,17 @@
 import Rand from "rand-seed";
 import unbug from "unbug";
+import { genseed } from "./memorable-seed.js";
 
 const debug = unbug("rng");
-const seed = Math.random().toString();
-debug(seed);
 
 export class RNG {
-  constructor(seed) {
+  constructor() {
+    this.reset();
+  }
+
+  reset() {
+    const seed = genseed();
+    debug(seed);
     this.seed = seed;
     this.rng = new Rand.default(seed);
   }
@@ -43,4 +48,4 @@ export class RNG {
   }
 }
 
-export const rng = new RNG(seed);
+export const rng = new RNG();

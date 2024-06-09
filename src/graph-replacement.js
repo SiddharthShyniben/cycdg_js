@@ -51,6 +51,7 @@ export class GraphReplacementApplier {
   }
 
   reset() {
+    rng.reset();
     this.graph = new Graph(this.width, this.height);
 
     this.desiredFillPercentage = rng.randInRange(
