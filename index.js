@@ -1,8 +1,15 @@
 import { GraphReplacementApplier } from "./src/graph-replacement.js";
 import { drawGraph } from "./src/render_graph.js";
 import keypress from "keypress";
+import parseArgs from "@nuff-said/args";
 
-const GRA = new GraphReplacementApplier(10, 5);
+const args = parseArgs(process.argv.slice(2));
+
+const GRA = new GraphReplacementApplier(args.flags.width, args.flags.height, {
+  desiredFeatures: args.flags.features,
+  ...args.flags,
+});
+
 drawGraph(GRA);
 
 // make `process.stdin` begin emitting "keypress" events

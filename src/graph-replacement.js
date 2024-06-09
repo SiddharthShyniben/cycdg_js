@@ -31,6 +31,7 @@ export class GraphReplacementApplier {
       minFilledPercentage,
       maxFilledPercentage,
       maxTeleports,
+      seed,
     } = {},
   ) {
     this.width = clamp(width, 4, 25);
@@ -47,14 +48,15 @@ export class GraphReplacementApplier {
     if (this.maxFilledPercentage < this.minFilledPercentage)
       this.maxFilledPercentage = this.minFilledPercentage;
 
-    this.rng = new RNG();
+    this.seed = seed;
+    this.rng = new RNG(this.seed);
     this.graph = new Graph(this.width, this.height, this.rng);
 
     this.reset();
   }
 
   reset() {
-    this.rng.reset();
+    this.rng.reset(this.seed);
     this.graph.reset();
 
     this.desiredFillPercentage = this.rng.randInRange(

@@ -5,12 +5,11 @@ import { genseed } from "./memorable-seed.js";
 const debug = unbug("rng");
 
 export class RNG {
-  constructor() {
-    this.reset();
+  constructor(seed) {
+    this.reset(seed);
   }
 
-  reset() {
-    const seed = genseed();
+  reset(seed = genseed()) {
     debug(seed);
     this.seed = seed;
     this.rng = new Rand.default(seed);
