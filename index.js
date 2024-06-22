@@ -1,13 +1,13 @@
 import { GraphReplacementApplier } from "./src/graph-replacement.js";
 import { drawGraph } from "./src/render_graph.js";
 import keypress from "keypress";
-import parseArgs from "@nuff-said/args";
+import parseArgs from "minimist";
 
 const args = parseArgs(process.argv.slice(2));
 
-const GRA = new GraphReplacementApplier(args.flags.width, args.flags.height, {
-  desiredFeatures: args.flags.features,
-  ...args.flags,
+const GRA = new GraphReplacementApplier(args.width, args.height, {
+  desiredFeatures: args.features,
+  ...args,
 });
 
 drawGraph(GRA);

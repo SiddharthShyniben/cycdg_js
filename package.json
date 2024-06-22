@@ -11,10 +11,10 @@
   "author": "Siddharth Shyniben <siddharth.muscat@gmail.com> (https://siddu.tech/)",
   "license": "ISC",
   "dependencies": {
-    "@nuff-said/args": "^1.0.0",
     "@nuff-said/color": "^1.0.0",
     "keypress": "^0.2.1",
     "log-update": "^6.0.0",
+    "minimist": "^1.2.8",
     "rand-seed": "^1.0.2",
     "slice-ansi": "^7.1.0",
     "strip-ansi": "^7.1.0",
