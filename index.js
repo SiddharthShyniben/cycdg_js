@@ -2,6 +2,7 @@ import { GraphReplacementApplier } from "./src/graph-replacement.js";
 import { drawGraph } from "./src/render_graph.js";
 import keypress from "keypress";
 import parseArgs from "minimist";
+import { drawMap } from "./src/render_tiles.js";
 
 const args = parseArgs(process.argv.slice(2));
 
@@ -24,13 +25,13 @@ process.stdin.on("keypress", function (_, key) {
       let done = false;
 
       if (key.name == "return") {
+        if (GRA.shouldStop()) GRA.reset();
         while (!(GRA.shouldStop() || done)) {
           done = GRA.applyRandomReplacementRule();
           drawGraph(GRA);
         }
-        if (GRA.shouldStop()) GRA.reset();
-      } else if (key.name == "d") {
-        console.log(GRA.graph.nodes);
+      } else if (key.name == "r") {
+        drawMap(GRA);
       } else {
         done = GRA.applyRandomReplacementRule();
         drawGraph(GRA);
