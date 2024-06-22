@@ -215,3 +215,8 @@ export const getArrow = (edge, dir) =>
             : hasTag(edge, tags.OneTimeEdge)
               ? arrows[dir].oneTime
               : arrows[dir].default;
+
+export const nodeWidth = 9;
+export const nodeHeight = 5;
+export const nodeSpacing = 3;
+export const nodeTotalWidth = nodeWidth + nodeSpacing;

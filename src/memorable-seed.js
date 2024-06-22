@@ -1,5 +1,3 @@
-import { range } from "./util.js";
-
 const MEMORABLE_LIST = [
   "child",
   "food",

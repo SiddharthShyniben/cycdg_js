@@ -1,7 +1,13 @@
 import sliceAnsi from "slice-ansi";
 import { fmt } from "./coords.js";
 import { hasTag, tags } from "./graph.js";
-import { getArrow, range } from "./util.js";
+import {
+  getArrow,
+  nodeHeight,
+  nodeTotalWidth,
+  nodeWidth,
+  range,
+} from "./util.js";
 
 import color from "@nuff-said/color";
 import { stripAnsi } from "unbug/src/util.js";
@@ -64,7 +70,7 @@ export const drawGraph = (GRA) => {
       const t = [];
       for (const tag of tagsToCheck) if (hasTag(node, tag)) t.push(tag);
 
-      item.text = t.join(", ").padEnd(9 * 5, " ");
+      item.text = t.join(", ").padEnd(nodeWidth * nodeHeight, " ");
 
       cells.push(item);
     }
@@ -73,8 +79,8 @@ export const drawGraph = (GRA) => {
     const write = (edges) => {
       let text = cells
         .map((x, i) => {
-          let text = x.text.slice(0, 9);
-          cells[i].text = x.text.slice(9);
+          let text = x.text.slice(0, nodeWidth);
+          cells[i].text = x.text.slice(nodeWidth);
 
           let addEdgeMarker = false;
           let edgeMarker = " → ";
@@ -92,7 +98,8 @@ export const drawGraph = (GRA) => {
           if (x.fg) text = x.fg(text);
           if (addEdgeMarker) text += edgeMarker;
           const len = stripAnsi(text).length;
-          if (len < 12) text = text + " ".repeat(12 - len);
+          if (len < nodeTotalWidth)
+            text = text + " ".repeat(nodeTotalWidth - len);
           return text;
         })
         .join("");
@@ -110,16 +117,16 @@ export const drawGraph = (GRA) => {
     process.stdout.write("\n");
     write();
 
-    let toPrint = " ".repeat(12 * cells.length);
+    let toPrint = " ".repeat(nodeTotalWidth * cells.length);
 
     // Vertical edges
     for (let i = 0; i < cells.length; i++) {
       const edge = cells[i].node.edges[1];
       if (edge.enabled) {
         toPrint =
-          sliceAnsi(toPrint, 0, i * 12 + 4) +
+          sliceAnsi(toPrint, 0, i * nodeTotalWidth + 4) +
           getArrow(edge, edge.reversed ? "up" : "down") +
-          sliceAnsi(toPrint, i * 12 + 4);
+          sliceAnsi(toPrint, i * nodeTotalWidth + 4);
       }
     }
     process.stdout.write("\n" + toPrint);
