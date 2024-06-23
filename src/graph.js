@@ -1,45 +1,12 @@
-import { add, fmt, is, spread, sub, vec, vectorTo } from "./coords.js";
-import { arr2d, error, getAllRectCoordsClockwise } from "./util.js";
-
 import color from "@nuff-said/color";
 import unbug from "unbug";
 
+import { arr2d, error, getAllRectCoordsClockwise } from "./util.js";
+import { add, fmt, is, sub, vec, vectorTo } from "./coords.js";
+import { cardinalDirections, tags } from "./consts.js";
+
 const debug = unbug("graph");
 const draw_ = debug.extend("drawing");
-
-export const tags = {
-  Start: "Start",
-  Goal: "Goal",
-  Key: "Key",
-  HalfKey: "HalfKey",
-  MasterKey: "MasterKey",
-  Boss: "Boss",
-  Treasure: "Treasure",
-  Hazard: "Hazard",
-  Trap: "Trap",
-  Teleport: "Teleport",
-  LockedEdge: "LockedEdge",
-  BilockedEdge: "BilockedEdge",
-  MasterLockedEdge: "MasterLockedEdge",
-  WindowEdge: "WindowEdge",
-  OneTimeEdge: "OneTimeEdge",
-  OneWayEdge: "OneWayEdge",
-  SecretEdge: "SecretEdge",
-};
-
-export const cardinalDirections = [
-  vec(0, -1),
-  vec(1, 0),
-  vec(0, 1),
-  vec(-1, 0),
-];
-
-export const diagonalDirections = [
-  vec(-1, -1),
-  vec(1, -1),
-  vec(1, 1),
-  vec(-1, 1),
-];
 
 export const hasTag = (n, kind) => !!n.tags.find((t) => t.tag == kind);
 export const swapTags = (a, b) => ([a.tags, b.tags] = [b.tags, a.tags]);

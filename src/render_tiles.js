@@ -1,6 +1,8 @@
-import { Tiler, tiles } from "./tiler.js";
-import { arr2d, nodeTotalWidth } from "./util.js";
 import color from "@nuff-said/color";
+
+import { Tiler } from "./tiler.js";
+import { arr2d } from "./util.js";
+import { tiles } from "./consts.js";
 
 export const drawMap = (GRA) => {
   console.clear();

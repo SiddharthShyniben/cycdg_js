@@ -1,16 +1,11 @@
 import sliceAnsi from "slice-ansi";
-import { fmt } from "./coords.js";
-import { hasTag, tags } from "./graph.js";
-import {
-  getArrow,
-  nodeHeight,
-  nodeTotalWidth,
-  nodeWidth,
-  range,
-} from "./util.js";
-
-import color from "@nuff-said/color";
 import { stripAnsi } from "unbug/src/util.js";
+import color from "@nuff-said/color";
+
+import { tags, nodeHeight, nodeTotalWidth, nodeWidth } from "./consts.js";
+import { getArrow, range } from "./util.js";
+import { hasTag } from "./graph.js";
+import { fmt } from "./coords.js";
 
 export const drawGraph = (GRA) => {
   const { graph, appliedRules } = GRA;

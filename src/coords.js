@@ -1,4 +1,5 @@
 export const vec = (x = 0, y = x) => (typeof x.x == "number" ? x : { x, y });
+
 const _vecify =
   (fn) =>
   (...args) =>

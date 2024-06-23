@@ -1,5 +1,6 @@
 import Rand from "rand-seed";
 import unbug from "unbug";
+
 import { genseed } from "./memorable-seed.js";
 
 const debug = unbug("rng");

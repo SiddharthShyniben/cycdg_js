@@ -1,12 +1,3 @@
-import { adjacent, vec } from "../coords.js";
-import { tags } from "../graph.js";
-import {
-  areCoordsAdjacentToRectCorner,
-  areCoordsOnRect,
-  moveRandomNodeTag,
-  randomHazard,
-} from "../util.js";
-import { graphHasNoFinalizedNodesNear } from "./helper.js";
 import {
   makeKeyLockFeature,
   makeMasterLockFeature,
@@ -17,7 +8,16 @@ import {
   makeTagAdder,
   makeTwoMasterLockFeature,
   makeWindowPassageFeature,
+  graphHasNoFinalizedNodesNear,
 } from "./util.js";
+import {
+  areCoordsAdjacentToRectCorner,
+  areCoordsOnRect,
+  moveRandomNodeTag,
+  randomHazard,
+} from "../util.js";
+import { adjacent, vec } from "../coords.js";
+import { tags } from "../consts.js";
 
 // NOTE: some sort of scaffolding system for this?
 export default [

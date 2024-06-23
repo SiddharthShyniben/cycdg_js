@@ -2,19 +2,19 @@ import unbug from "unbug";
 import logUpdate from "log-update";
 import color from "@nuff-said/color";
 
-import { Graph } from "./graph.js";
-import { clamp, error } from "./util.js";
-
-import allInitalRules from "./grammar/initial-rules.js";
+import initalRules from "./grammar/initial-rules.js";
+import replacementRules from "./grammar/replacement-rules.js";
 import {
   countEmptyEditableNodesNearEnabledOnes,
   getRandomApplicableCoordsForRule,
   isRuleApplicableForGraph,
   tryFindAllApplicableCoordVariantsRecursively,
 } from "./grammar/helper.js";
-import { RNG } from "./rng.js";
+
+import { clamp, error } from "./util.js";
+import { Graph } from "./graph.js";
 import { fmt } from "./coords.js";
-import replacementRules from "./grammar/replacement-rules.js";
+import { RNG } from "./rng.js";
 
 const debug = unbug("applier");
 
@@ -109,7 +109,7 @@ export class GraphReplacementApplier {
 
   applyRandomInitialRule() {
     debug("Applying random inital rule");
-    const rule = allInitalRules[this.rng.randInRange(allInitalRules.length)];
+    const rule = initalRules[this.rng.randInRange(initalRules.length)];
     if (isRuleApplicableForGraph(rule, this.graph)) this.applyInitialRule(rule);
     else console.error("Rule failed!", rule.name);
     this.enabledNodesCount = this.graph.countEnabled();

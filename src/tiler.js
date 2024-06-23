@@ -1,28 +1,8 @@
 // TODO: Add cogmind style (tunneling) tiler?
 
+import { tiles } from "./consts.js";
+import { arr2d, getTileTypeForEdge, range } from "./util.js";
 import { vec } from "./coords.js";
-import { hasTag, tags } from "./graph.js";
-import { arr2d, range } from "./util.js";
-
-export const tiles = {
-  Unset: -1,
-  RoomFloor: -2,
-  CaveFloor: -3,
-  Wall: -4,
-  Barrier: -5,
-  Door: -6,
-  LockedDoor: -7,
-  SecretDoor: -8,
-};
-
-export const getTileTypeForEdge = (e) =>
-  e.enabled
-    ? hasTag(e, tags.LockedEdge)
-      ? tiles.LockedDoor
-      : hasTag(e, tags.SecretEdge)
-        ? tiles.SecretDoor
-        : tiles.Door
-    : tiles.Barrier;
 
 // Dungeon-style tiler
 export class Tiler {

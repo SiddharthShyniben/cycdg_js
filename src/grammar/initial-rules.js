@@ -1,5 +1,5 @@
-import { add, adjacent, fmt, is, manhattan, vec } from "../coords.js";
-import { tags } from "../graph.js";
+import unbug from "unbug";
+
 import {
   areCoordsInRectCorner,
   areCoordsOnRect,
@@ -8,8 +8,8 @@ import {
   pushNodeContensInRandomDirectionWithEdgeTag,
   randomHazard,
 } from "../util.js";
-
-import unbug from "unbug";
+import { add, adjacent, fmt, is, manhattan, vec } from "../coords.js";
+import { tags } from "../consts.js";
 
 const debug = unbug("initial-rules");
 const feat = debug.extend("feature");

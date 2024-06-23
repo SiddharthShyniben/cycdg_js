@@ -1,7 +1,8 @@
 import unbug from "unbug";
-import color from "@nuff-said/color";
+
 import { adjacent, fmt, vec } from "./coords.js";
-import { hasTag, tags } from "./graph.js";
+import { hasTag } from "./graph.js";
+import { arrows, tags, tiles } from "./consts.js";
 
 const debug = unbug("util");
 
@@ -162,45 +163,6 @@ export const addTagAtRandomActiveNode = (graph, tag) =>
 
 export const clamp = (num, min, max) => Math.max(Math.min(num, max), min);
 
-export const arrows = {
-  up: {
-    default: "↑",
-    masterlocked: color.red("⇧"),
-    locked: "⇧",
-    secret: color.dim("↑"),
-    window: "⇡",
-    oneWay: color.cyan("↑"),
-    oneTime: color.yellow("↑"),
-  },
-  down: {
-    default: "↓",
-    masterlocked: color.red("⇩"),
-    locked: "⇩",
-    secret: color.dim("↓"),
-    window: "⇣",
-    oneWay: color.cyan("↓"),
-    oneTime: color.yellow("↓"),
-  },
-  left: {
-    default: "←",
-    masterlocked: color.red("⇦"),
-    locked: "⇦",
-    secret: color.dim("←"),
-    window: "⇠",
-    oneWay: color.cyan("←"),
-    oneTime: color.yellow("←"),
-  },
-  right: {
-    default: "→",
-    masterlocked: color.red("⇨"),
-    locked: "⇨",
-    secret: color.dim("→"),
-    window: "⇢",
-    oneWay: color.cyan("→"),
-    oneTime: color.yellow("→"),
-  },
-};
-
 export const getArrow = (edge, dir) =>
   hasTag(edge, tags.MasterLockedEdge)
     ? arrows[dir].masterlocked
@@ -216,7 +178,11 @@ export const getArrow = (edge, dir) =>
               ? arrows[dir].oneTime
               : arrows[dir].default;
 
-export const nodeWidth = 9;
-export const nodeHeight = 5;
-export const nodeSpacing = 3;
-export const nodeTotalWidth = nodeWidth + nodeSpacing;
+export const getTileTypeForEdge = (e) =>
+  e.enabled
+    ? hasTag(e, tags.LockedEdge)
+      ? tiles.LockedDoor
+      : hasTag(e, tags.SecretEdge)
+        ? tiles.SecretDoor
+        : tiles.Door
+    : tiles.Barrier;
