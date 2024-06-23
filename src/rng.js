@@ -29,6 +29,10 @@ export class RNG {
     return Math.floor(this.rng.next() * (maxFloored - minCeiled) + minCeiled);
   }
 
+  chance(percentage) {
+    return this.randInRange(0, 100) <= percentage;
+  }
+
   fromArr(array) {
     return array[this.randInRange(0, array.length)];
   }
